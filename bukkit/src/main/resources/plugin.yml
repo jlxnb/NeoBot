@@ -1,0 +1,9 @@
+name: NeoBot
+main: dev.neovoxel.neobot.NeoBotBukkit
+version: 0.1
+author: NeoVoxelDev
+description: A bot plugin that connects Minecraft with QQ, Kook, Discord, etc.
+api-version: 1.13
+commands:
+  neobot:
+    description: NeoBot command

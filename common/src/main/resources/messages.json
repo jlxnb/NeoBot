@@ -1,0 +1,15 @@
+{
+  "prefix": "&6[NeoBot] ",
+  "internal": {
+    "help": [
+      "&6NeoBot 帮助信息",
+      "&a/neobot help   &b- 查看此帮助信息",
+      "&a/neobot reload   &b- 重载插件"
+    ],
+    "reload": {
+      "reloading": "&a正在重载插件...",
+      "reloaded": "&a插件重载完成!"
+    },
+    "no-permission": "&cYou don't have permission to do this!"
+  }
+}
