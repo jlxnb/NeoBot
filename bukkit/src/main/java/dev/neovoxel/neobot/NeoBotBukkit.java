@@ -7,8 +7,7 @@ import dev.neovoxel.neobot.adapter.BukkitScheduledTask;
 import dev.neovoxel.neobot.bot.BotListener;
 import dev.neovoxel.neobot.bot.BotProvider;
 import dev.neovoxel.neobot.command.CommandProvider;
-import dev.neovoxel.neobot.config.Config;
-import dev.neovoxel.neobot.config.MessageConfig;
+import dev.neovoxel.neobot.config.EnhancedConfig;
 import dev.neovoxel.neobot.event.BukkitEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
@@ -26,7 +25,7 @@ import java.util.List;
 public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     private GameEventListener listener;
     private BotListener botListener;
-    private Config generalConfig;
+    private EnhancedConfig generalConfig;
     private boolean scriptSystemLoaded = false;
     private List<Script> scripts = new ArrayList<>();
     private DatabaseStorage storage;
@@ -34,7 +33,7 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     private BotProvider botProvider;
     private ScriptProvider scriptProvider;
     private CommandProvider commandProvider;
-    private MessageConfig messageConfig;
+    private EnhancedConfig messageConfig;
 
     @Override
     public NeoLogger getNeoLogger() {
@@ -73,22 +72,22 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     }
 
     @Override
-    public void setGeneralConfig(Config config) {
+    public void setGeneralConfig(EnhancedConfig config) {
         this.generalConfig = config;
     }
 
     @Override
-    public Config getGeneralConfig() {
+    public EnhancedConfig getGeneralConfig() {
         return generalConfig;
     }
 
     @Override
-    public void setMessageConfig(MessageConfig messageConfig) {
+    public void setMessageConfig(EnhancedConfig messageConfig) {
         this.messageConfig = messageConfig;
     }
 
     @Override
-    public MessageConfig getMessageConfig() {
+    public EnhancedConfig getMessageConfig() {
         return messageConfig;
     }
 

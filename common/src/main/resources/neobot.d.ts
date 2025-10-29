@@ -91,9 +91,19 @@ declare interface QQ {
 
 declare const qq: QQ
 
-declare interface JoinEvent {
+declare interface LoginEvent {
     getName(): string
     disallow(reason: string): void
+}
+
+declare interface JoinEvent extends Player {}
+
+declare interface QuitEvent extends Player {}
+
+declare interface ChatEvent {
+    getPlayer(): Player
+    getMessage(): string
+    disallow(): void
 }
 
 declare interface Player {
@@ -131,16 +141,13 @@ declare interface Config {
     getArray(node: string): Config[]
     getStringArray(node: string): string[]
     getNumberArray(node: string): number[]
-}
-
-declare const generalConfig: Config
-
-declare interface MessageConfig extends Config {
     getMessage(node: string): string
     addOption(node: string, defaultValue: any): void
 }
 
-declare const messageConfig: MessageConfig
+declare const generalConfig: Config
+
+declare const messageConfig: Config
 
 declare interface Logger {
     info(message: string): void

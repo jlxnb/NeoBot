@@ -23,19 +23,19 @@ public interface ConfigProvider {
         getMessageConfig().flush(plugin);
     }
 
-    void setMessageConfig(MessageConfig config);
+    void setMessageConfig(EnhancedConfig config);
 
-    MessageConfig getMessageConfig();
+    EnhancedConfig getMessageConfig();
 
-    void setGeneralConfig(Config config);
+    void setGeneralConfig(EnhancedConfig config);
 
-    Config getGeneralConfig();
+    EnhancedConfig getGeneralConfig();
 
     default void loadGeneralConfig(NeoBot plugin) {
         try {
             File configFile = new File(plugin.getDataFolder(), "config.json");
             if (!configFile.exists()) saveResource(plugin.getDataFolder(), "config.json");
-            setGeneralConfig(new Config(new JSONObject(new String(Files.readAllBytes(configFile.toPath())))));
+            setGeneralConfig(new EnhancedConfig(configFile, new JSONObject(new String(Files.readAllBytes(configFile.toPath())))));
         } catch (Exception e) {
             plugin.getNeoLogger().error("Failed to release the general config file", e);
         }
@@ -45,7 +45,7 @@ public interface ConfigProvider {
         try {
             File messageFile = new File(plugin.getDataFolder(), "messages.json");
             if (!messageFile.exists()) saveResource(plugin.getDataFolder(), "messages.json");
-            setMessageConfig(new MessageConfig(messageFile, new JSONObject(new String(Files.readAllBytes(messageFile.toPath())))));
+            setMessageConfig(new EnhancedConfig(messageFile, new JSONObject(new String(Files.readAllBytes(messageFile.toPath())))));
         } catch (Exception e) {
             plugin.getNeoLogger().error("Failed to release the messages config file", e);
         }

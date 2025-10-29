@@ -2,7 +2,6 @@ package dev.neovoxel.neobot.config;
 
 import dev.neovoxel.neobot.NeoBot;
 import org.graalvm.polyglot.HostAccess;
-import org.h2.util.json.JSONValue;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -14,11 +13,11 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageConfig extends Config {
+public class EnhancedConfig extends Config {
     private final File file;
     private final Map<String, Object> needFlushOptions = new HashMap<>();
 
-    public MessageConfig(File file, JSONObject jsonObject) {
+    public EnhancedConfig(File file, JSONObject jsonObject) {
         super(new JSONObject(jsonObject.toString().replace("&", "§")));
         this.file = file;
     }
