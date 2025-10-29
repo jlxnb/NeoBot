@@ -11,12 +11,8 @@ import dev.neovoxel.neobot.script.ScriptProvider;
 import dev.neovoxel.neobot.storage.StorageProvider;
 import dev.neovoxel.neobot.util.CommandSender;
 import dev.neovoxel.neobot.util.NeoLogger;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.Value;
-import org.slf4j.Logger;
 
 import java.io.File;
-import java.net.URISyntaxException;
 
 public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, SchedulerProvider, StorageProvider {
     default void enable() {
@@ -109,14 +105,4 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
     void registerCommands();
 
     void cancelAllTasks();
-
-    @HostAccess.Export
-    default void addInternalParser(Value parser) {
-        getScriptProvider().loadParser(parser);
-    }
-
-    @HostAccess.Export
-    default String internalParse(String content) {
-        return getScriptProvider().parse(content);
-    }
 }

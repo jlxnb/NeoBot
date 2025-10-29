@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.json.JSONObject;
 
@@ -16,7 +17,9 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ScriptProvider {
     @Getter
@@ -26,6 +29,8 @@ public class ScriptProvider {
     private List<Script> scripts = new ArrayList<>();
 
     private List<Value> placeholderParsers = new ArrayList<>();
+    
+    private Map<String, Value> methods = new HashMap<>();
 
     private final NeoBot plugin;
 
@@ -65,6 +70,7 @@ public class ScriptProvider {
         context.getBindings("js").putMember("gameCommand", plugin.getCommandProvider());
         context.getBindings("js").putMember("messageConfig", plugin.getMessageConfig());
         context.getBindings("js").putMember("generalConfig", plugin.getGeneralConfig());
+        context.getBindings("js").putMember("scriptManager", this);
         File scriptPath = new File(plugin.getDataFolder(), "scripts");
         if (!scriptPath.exists()) {
             scriptPath.mkdirs();
@@ -116,22 +122,45 @@ public class ScriptProvider {
         context = null;
         scripts.clear();
         placeholderParsers.clear();
+        methods.clear();
     }
 
     public void downloadDefault() {
 
     }
 
+    @HostAccess.Export
     public void loadParser(Value value) {
         if (value.canExecute()) {
             placeholderParsers.add(value);
         }
     }
 
+    @HostAccess.Export
     public String parse(String content) {
         for (Value value : placeholderParsers) {
             content = value.execute(content).asString();
         }
         return content;
+    }
+
+    @HostAccess.Export
+    public boolean isScriptLoaded(String name) {
+        return scripts.stream().anyMatch(script -> script.getName().equals(name));
+    }
+
+    @HostAccess.Export
+    public void addJsMethod(String name, Value value) {
+        methods.put(name, value);
+    }
+
+    @HostAccess.Export
+    public boolean hasJsMethod(String name) {
+        return methods.containsKey(name);
+    }
+
+    @HostAccess.Export
+    public Value callJsMethod(String name, Object... args) {
+        return methods.get(name).execute(args);
     }
 }

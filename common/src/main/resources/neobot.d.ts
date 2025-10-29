@@ -221,6 +221,16 @@ declare interface Player {
     kick(message: string): void
 }
 
+declare interface ScriptManager {
+    loadParser(parser: (arg: string) => string): void
+    parse(content: string): string
+    addJsMethod(name: string, method: (arg: any[]) => any): void
+    hasJsMethod(name: string): boolean
+    callJsMethod(name: string, args: any[]): any
+}
+
+declare const scriptManager: ScriptManager
+
 declare interface NeoBot {
     getNeoLogger(): Logger
     getStorage(): DatabaseStorage
@@ -229,8 +239,6 @@ declare interface NeoBot {
     getOnlinePlayers(): Player[]
     getOnlinePlayer(name: string): Player
     parsePlaceholder(message: string, player: Player): string
-    addInternalParser(parser: (arg: string) => string): void
-    internalParse(content: string): string
 }
 
 declare const plugin: NeoBot
