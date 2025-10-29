@@ -123,7 +123,7 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     }
 
     @Override
-    public void shutdown() {
+    public void cancelAllTasks() {
         BukkitScheduledTask.cancelAll();
     }
 
@@ -155,11 +155,6 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     @Override
     public void onDisable() {
         this.disable();
-    }
-
-    @Override
-    public void cancelAllTasks() {
-        BukkitScheduledTask.cancelAll();
     }
 
     @Override

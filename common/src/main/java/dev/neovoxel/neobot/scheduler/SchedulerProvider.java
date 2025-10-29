@@ -13,5 +13,5 @@ public interface SchedulerProvider {
 
     ScheduledTask submitAsync(Runnable task, long delay, long period);
 
-    void shutdown();
+    void cancelAllTasks();
 }

@@ -103,6 +103,4 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
     void setCommandProvider(CommandProvider commandProvider);
 
     void registerCommands();
-
-    void cancelAllTasks();
 }
