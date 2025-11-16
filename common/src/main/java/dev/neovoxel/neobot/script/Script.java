@@ -15,11 +15,28 @@ public class Script {
     private final String version;
     private final List<String> loadbefore = new ArrayList<>();
     private final List<String> loadafter = new ArrayList<>();
+    private final List<String> depends = new ArrayList<>();
     private String description;
     private final File entrypoint;
 
     public String toExpression() {
         return author + ":" + name + ":" + version;
+    }
+
+    public boolean checkDepends(Collection<Script> checkedScripts) {
+        for (String dependency : depends) {
+            boolean found = false;
+            for (Script checkedScript : checkedScripts) {
+                if (checkedScript.getName().equals(dependency)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<Script> sortScripts(Set<Script> scripts) {

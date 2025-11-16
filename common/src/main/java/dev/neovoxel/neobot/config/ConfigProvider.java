@@ -1,6 +1,7 @@
 package dev.neovoxel.neobot.config;
 
 import dev.neovoxel.neobot.NeoBot;
+import dev.neovoxel.neobot.script.Script;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -13,6 +14,7 @@ public interface ConfigProvider {
         }
         loadGeneralConfig(plugin);
         loadMessageConfig(plugin);
+        loadScriptConfig(plugin);
     }
 
     default void reloadConfig(NeoBot plugin) {
@@ -21,9 +23,14 @@ public interface ConfigProvider {
         }
         getGeneralConfig().flush(plugin);
         getMessageConfig().flush(plugin);
+        getScriptConfig().flush(plugin);
     }
 
     void setMessageConfig(EnhancedConfig config);
+
+    void setScriptConfig(ScriptConfig config);
+
+    ScriptConfig getScriptConfig();
 
     EnhancedConfig getMessageConfig();
 
@@ -48,6 +55,17 @@ public interface ConfigProvider {
             setMessageConfig(new EnhancedConfig(messageFile, new JSONObject(new String(Files.readAllBytes(messageFile.toPath())))));
         } catch (Exception e) {
             plugin.getNeoLogger().error("Failed to release the messages config file", e);
+        }
+    }
+
+    default void loadScriptConfig(NeoBot plugin) {
+        try {
+            File scriptFile = new File(plugin.getDataFolder(), "scripts.json");
+            if (!scriptFile.exists()) saveResource(plugin.getDataFolder(), "scripts.json");
+            setScriptConfig(new ScriptConfig(scriptFile, new JSONObject(new String(Files.readAllBytes(scriptFile.toPath()))),
+                    getGeneralConfig()));
+        } catch (Exception e) {
+            plugin.getNeoLogger().error("Failed to release the scripts config file", e);
         }
     }
 

@@ -60,7 +60,7 @@ public class ScriptProvider {
         context.getBindings("js").putMember("gameEvent", plugin.getGameEventListener());
         context.getBindings("js").putMember("gameCommand", plugin.getCommandProvider());
         context.getBindings("js").putMember("messageConfig", plugin.getMessageConfig());
-        context.getBindings("js").putMember("generalConfig", plugin.getGeneralConfig());
+        context.getBindings("js").putMember("generalConfig", plugin.getScriptConfig());
         context.getBindings("js").putMember("scriptManager", this);
         File scriptPath = new File(plugin.getDataFolder(), "scripts");
         if (!scriptPath.exists()) {
@@ -101,10 +101,24 @@ public class ScriptProvider {
                     script.getLoadafter().add(object.toString());
                 }
             }
+            if (jsonObject.has("depends")) {
+                for (Object object : jsonObject.getJSONArray("depends")) {
+                    script.getDepends().add(object.toString());
+                }
+            }
             unsortedScripts.add(script);
         }
         List<Script> sortedScripts = Script.sortScripts(unsortedScripts);
+        List<Script> checkedScripts = new ArrayList<>();
         for (Script script : sortedScripts) {
+            if (!script.checkDepends(sortedScripts)) {
+                plugin.getNeoLogger().warn("The script " + script.getName() + " is missing dependencies, it needs: " +
+                        Arrays.toString(script.getDepends().toArray()));
+            } else {
+                checkedScripts.add(script);
+            }
+        }
+        for (Script script : checkedScripts) {
             loadScript(plugin, script);
         }
         scriptSystemLoaded = true;

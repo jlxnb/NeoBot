@@ -2,6 +2,7 @@ package dev.neovoxel.neobot.config;
 
 import dev.neovoxel.neobot.NeoBot;
 import org.graalvm.polyglot.HostAccess;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class EnhancedConfig extends Config {
@@ -31,7 +33,7 @@ public class EnhancedConfig extends Config {
     public void addOption(String node, Object defaultValue) {
         if (!super.has(node)) {
             super.put(node, defaultValue);
-            needFlushOptions.put(node, defaultValue);
+            needFlushOptions.put(node, convertPolyglotValue(defaultValue));
         }
     }
 
@@ -47,7 +49,7 @@ public class EnhancedConfig extends Config {
                 config.put(entry.getKey(), entry.getValue());
             }
             OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
-            writer.write(config.getJsonObject().toString());
+            writer.write(config.getJsonObject().toString(4));
             writer.close();
             needFlushOptions.clear();
             super.jsonObject = new JSONObject(config.getJsonObject().toString().replace("&", "§"));

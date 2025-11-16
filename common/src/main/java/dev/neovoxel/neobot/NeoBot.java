@@ -51,6 +51,7 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
     default void disable() {
         getGeneralConfig().flush(this);
         getMessageConfig().flush(this);
+        getScriptConfig().flush(this);
         getNeoLogger().info("Unloading all scripts...");
         getScriptProvider().unloadScript();
         getBotProvider().getBotListener().reset();
@@ -65,6 +66,7 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
 
     default void reload(CommandSender sender) {
         getScriptProvider().setScriptSystemLoaded(false);
+        cancelAllTasks();
         getNeoLogger().info("Reloading config...");
         reloadConfig(this);
         submitAsync(() -> {

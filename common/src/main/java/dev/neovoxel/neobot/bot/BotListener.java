@@ -19,6 +19,7 @@ import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,70 +34,124 @@ public class BotListener implements NBotListener {
 
     @HostAccess.Export
     public void sendGroupMessage(long groupId, String message) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SendGroupMessage(groupId, new JSONArray(message))));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SendGroupMessage(groupId, new JSONArray(message)));
+            }
+        });
     }
 
     @HostAccess.Export
     public void sendPrivateMessage(long userId, String message) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SendPrivateMessage(userId, new JSONArray(message))));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SendPrivateMessage(userId, new JSONArray(message)));
+            }
+        });
     }
 
     @HostAccess.Export
     public void renameGroupMember(long groupId, long userId, String name) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupCard(groupId, userId, name)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupCard(groupId, userId, name));
+            }
+        });
     }
 
     @HostAccess.Export
     public void muteGroupMember(long groupId, long userId, int duration) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupBan(groupId, userId, duration)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupBan(groupId, userId, duration));
+            }
+        });
     }
 
     @HostAccess.Export
     public void muteAllGroupMember(long groupId) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupWholeBan(groupId, true)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupWholeBan(groupId, true));
+            }
+        });
     }
 
     @HostAccess.Export
     public void unMuteAllGroupMember(long groupId) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupWholeBan(groupId, false)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupWholeBan(groupId, false));
+            }
+        });
     }
 
     @HostAccess.Export
     public void kickGroupMember(long groupId, long userId) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupKick(groupId, userId)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupKick(groupId, userId));
+            }
+        });
     }
 
     @HostAccess.Export
     public void approveGroupRequest(String flag, String type) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupAddRequest(flag, GroupRequestType.from(type))));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupAddRequest(flag, GroupRequestType.from(type)));
+            }
+        });
     }
 
     @HostAccess.Export
     public void rejectGroupRequest(String flag, String type) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetGroupAddRequest(flag, GroupRequestType.from(type), false)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupAddRequest(flag, GroupRequestType.from(type), false));
+            }
+        });
     }
 
     @HostAccess.Export
     public void approveFriendRequest(String flag) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetFriendAddRequest(flag)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetFriendAddRequest(flag));
+            }
+        });
     }
 
     @HostAccess.Export
     public void rejectFriendRequest(String flag) {
-        plugin.getBotProvider().getBot().forEach(client -> client.action(new SetFriendAddRequest(flag, false)));
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetFriendAddRequest(flag, false));
+            }
+        });
     }
 
     @HostAccess.Export
     public void getGroupMemberInfo(long groupId, long userId, Value method) {
         if (method.canExecute()) {
-            plugin.getBotProvider().getBot().forEach(client -> client.action(new GetGroupMemberInfo(groupId, userId), method::execute));
+            plugin.getBotProvider().getBot().forEach(client -> {
+                if (client.isConnected()) {
+                    client.action(new GetGroupMemberInfo(groupId, userId), method::execute);
+                } else {
+                    method.execute(new Object());
+                }
+            });
         }
     }
 
     @HostAccess.Export
     public void getGroupMemberList(long groupId, Value method) {
         if (method.canExecute()) {
-            plugin.getBotProvider().getBot().forEach(client -> client.action(new GetGroupMemberList(groupId), method::execute));
+            plugin.getBotProvider().getBot().forEach(client -> {
+                if (client.isConnected()) {
+                    client.action(new GetGroupMemberList(groupId), method::execute);
+                } else method.execute(new ArrayList<>());
+            });
         }
     }
 

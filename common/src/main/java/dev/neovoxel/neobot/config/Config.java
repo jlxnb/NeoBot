@@ -6,6 +6,9 @@ import org.graalvm.polyglot.HostAccess;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 public class Config {
@@ -165,7 +168,27 @@ public class Config {
         }
         String lastNode = nodes[nodes.length - 1];
         if (!lastNode.isEmpty()) {
-            currentJson.put(lastNode, value);
+            currentJson.put(lastNode, convertPolyglotValue(value));
         }
+    }
+
+    protected Object convertPolyglotValue(Object value) {
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
+            JSONArray arr = new JSONArray();
+            for (Object o : list) {
+                arr.put(convertPolyglotValue(o));
+            }
+            return arr;
+        }
+        if (value instanceof Map<?,?>) {
+            Map<?, ?> map = (Map<?, ?>) value;
+            JSONObject obj = new JSONObject();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                obj.put(entry.getKey().toString(), convertPolyglotValue(entry.getValue()));
+            }
+            return obj;
+        }
+        return value;
     }
 }

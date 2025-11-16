@@ -9,6 +9,7 @@ import dev.neovoxel.neobot.bot.BotListener;
 import dev.neovoxel.neobot.bot.BotProvider;
 import dev.neovoxel.neobot.command.CommandProvider;
 import dev.neovoxel.neobot.config.EnhancedConfig;
+import dev.neovoxel.neobot.config.ScriptConfig;
 import dev.neovoxel.neobot.event.BukkitEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
@@ -38,6 +39,7 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     private ScriptProvider scriptProvider;
     private CommandProvider commandProvider;
     private EnhancedConfig messageConfig;
+    private ScriptConfig scriptConfig;
 
     @Override
     public NeoLogger getNeoLogger() {
@@ -83,6 +85,16 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     @Override
     public EnhancedConfig getGeneralConfig() {
         return generalConfig;
+    }
+
+    @Override
+    public void setScriptConfig(ScriptConfig scriptConfig) {
+        this.scriptConfig = scriptConfig;
+    }
+
+    @Override
+    public ScriptConfig getScriptConfig() {
+        return scriptConfig;
     }
 
     @Override
