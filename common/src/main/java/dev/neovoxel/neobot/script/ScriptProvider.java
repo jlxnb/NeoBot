@@ -30,7 +30,27 @@ public class ScriptProvider {
 
     int pluginSchemaVersion = 1;
 
-    private Context context;
+    private List<Context> contexts = new ArrayList<>();
+
+    private static final Engine engine;
+
+    static {
+        OutputStream stream = null;
+        try {
+            File jsLog = new File("engine.log");
+            if (!jsLog.exists()) jsLog.createNewFile();
+            stream = new FileOutputStream(jsLog);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Engine.Builder builder = Engine.newBuilder()
+                .allowExperimentalOptions(true)
+                .option("engine.WarnInterpreterOnly", "false");
+        if (stream != null) {
+            builder.logHandler(stream);
+        }
+        engine = builder.build();
+    }
 
     public void addLoadedScript(Script script) {
         scripts.add(script);
@@ -42,27 +62,6 @@ public class ScriptProvider {
 
     public void loadScript(NeoBot plugin) throws Throwable {
         plugin.getNeoLogger().info("Loading scripts...");
-        File jsLog = new File("engine.log");
-        if (!jsLog.exists()) jsLog.createNewFile();
-        OutputStream stream = new FileOutputStream(jsLog);
-        Engine engine = Engine.newBuilder()
-                .allowExperimentalOptions(true)
-                .option("engine.WarnInterpreterOnly", "false")
-                .logHandler(stream)
-                .build();
-        context = Context.newBuilder("js")
-                .allowIO(true)
-                .allowAllAccess(true)
-                .allowCreateThread(true)
-                .engine(engine)
-                .build();
-        context.getBindings("js").putMember("qq", plugin.getBotProvider().getBotListener());
-        context.getBindings("js").putMember("plugin", plugin);
-        context.getBindings("js").putMember("gameEvent", plugin.getGameEventListener());
-        context.getBindings("js").putMember("gameCommand", plugin.getCommandProvider());
-        context.getBindings("js").putMember("messageConfig", plugin.getMessageConfig());
-        context.getBindings("js").putMember("generalConfig", plugin.getScriptConfig());
-        context.getBindings("js").putMember("scriptManager", this);
         File scriptPath = new File(plugin.getDataFolder(), "scripts");
         if (!scriptPath.exists()) {
             scriptPath.mkdirs();
@@ -135,14 +134,27 @@ public class ScriptProvider {
         while ((line = reader.readLine()) != null) {
             builder.append(line).append("\n");
         }
+        Context context = Context.newBuilder("js")
+                .allowIO(true)
+                .allowAllAccess(true)
+                .allowCreateThread(true)
+                .engine(engine)
+                .build();
+        context.getBindings("js").putMember("qq", plugin.getBotProvider().getBotListener());
+        context.getBindings("js").putMember("plugin", plugin);
+        context.getBindings("js").putMember("gameEvent", plugin.getGameEventListener());
+        context.getBindings("js").putMember("gameCommand", plugin.getCommandProvider());
+        context.getBindings("js").putMember("messageConfig", plugin.getMessageConfig());
+        context.getBindings("js").putMember("generalConfig", plugin.getScriptConfig());
+        context.getBindings("js").putMember("scriptManager", this);
         context.eval("js", builder.toString());
         addLoadedScript(script);
         plugin.getNeoLogger().info("Loaded script " + script.getName());
     }
 
     public void unloadScript() {
-        context.close();
-        context = null;
+        contexts.forEach(Context::close);
+        contexts.clear();
         scripts.clear();
         placeholderParsers.clear();
         methods.clear();
