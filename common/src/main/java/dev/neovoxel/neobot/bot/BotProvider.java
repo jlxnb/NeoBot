@@ -37,7 +37,7 @@ public class BotProvider {
     }
 
     public void loadBot(NeoBot plugin) throws URISyntaxException {
-        for (String type : plugin.getGeneralConfig().getStringArray("bot.type").getList()) {
+        for (String type : plugin.getGeneralConfig().getStringArray("bot.type")) {
             if (type.equalsIgnoreCase("onebot11-ws")) {
                 loadOnebot11Ws(plugin);
             } else if (type.equalsIgnoreCase("onebot11-ws-reverse")) {

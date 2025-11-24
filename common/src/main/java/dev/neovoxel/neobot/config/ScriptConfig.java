@@ -1,11 +1,11 @@
 package dev.neovoxel.neobot.config;
 
-import dev.neovoxel.neobot.util.NeoProxyArray;
 import org.graalvm.polyglot.HostAccess;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.List;
 
 public class ScriptConfig extends EnhancedConfig {
     private final EnhancedConfig generalConfig;
@@ -47,7 +47,7 @@ public class ScriptConfig extends EnhancedConfig {
 
     @HostAccess.Export
     @Override
-    public NeoProxyArray<String> getStringArray(String node) {
+    public List<String> getStringArray(String node) {
         try {
             return super.getStringArray(node);
         } catch (Exception ignored) {
@@ -115,7 +115,7 @@ public class ScriptConfig extends EnhancedConfig {
 
     @HostAccess.Export
     @Override
-    public NeoProxyArray<Long> getNumberArray(String node) {
+    public List<Long> getNumberArray(String node) {
         try {
             return super.getNumberArray(node);
         } catch (Exception ignored) {

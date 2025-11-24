@@ -1,6 +1,5 @@
 package dev.neovoxel.neobot.config;
 
-import dev.neovoxel.neobot.util.NeoProxyArray;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.graalvm.polyglot.HostAccess;
@@ -100,7 +99,7 @@ public class Config {
     }
 
     @HostAccess.Export
-    public NeoProxyArray<String> getStringArray(String node) {
+    public List<String> getStringArray(String node) {
         JSONObject newObj = jsonObject;
         String[] nodes = node.split("\\.");
         for (int i = 0; i < nodes.length - 1; i++) {
@@ -111,11 +110,11 @@ public class Config {
         for (int i = 0; i < array.length(); i++) {
             strings.add(array.getString(i));
         }
-        return new NeoProxyArray<>(strings);
+        return strings;
     }
 
     @HostAccess.Export
-    public NeoProxyArray<Long> getNumberArray(String node) {
+    public List<Long> getNumberArray(String node) {
         JSONObject newObj = jsonObject;
         String[] nodes = node.split("\\.");
         for (int i = 0; i < nodes.length - 1; i++) {
@@ -126,7 +125,7 @@ public class Config {
         for (int i = 0; i < array.length(); i++) {
             numbers.add(array.getLong(i));
         }
-        return new NeoProxyArray<>(numbers);
+        return numbers;
     }
 
     @HostAccess.Export

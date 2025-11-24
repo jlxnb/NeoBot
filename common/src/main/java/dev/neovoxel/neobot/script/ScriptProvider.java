@@ -69,8 +69,15 @@ public class ScriptProvider {
         }
         HostAccess.Builder builder1 = HostAccess.newBuilder(HostAccess.EXPLICIT);
         builder1.allowAccessAnnotatedBy(HostAccess.Export.class);
-        for (Class clazz : exposed) {
-            for (Method method : clazz.getDeclaredMethods()) {
+        builder1.allowListAccess(true);
+        builder1.allowArrayAccess(true);
+        exposed.add(Object.class);
+        exposed.add(Enum.class);
+        for (Class<?> clazz : exposed) {
+            for (Method method : clazz.getMethods()) {
+                if (method.getName().equals("wait") || method.getName().equals("notify") || method.getName().equals("notifyAll")) {
+                    continue; // 跳过敏感方法
+                }
                 builder1.allowAccess(method);
             }
         }
