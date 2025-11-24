@@ -1,6 +1,5 @@
 package dev.neovoxel.neobot;
 
-import dev.neovoxel.jarflow.util.ExternalLoader;
 import dev.neovoxel.neobot.adapter.CommandSender;
 import dev.neovoxel.neobot.adapter.NeoLogger;
 import dev.neovoxel.neobot.adapter.RemoteExecutor;
@@ -10,14 +9,16 @@ import dev.neovoxel.neobot.config.ConfigProvider;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.game.GameProvider;
 import dev.neovoxel.neobot.library.LibraryProvider;
+import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.scheduler.SchedulerProvider;
 import dev.neovoxel.neobot.script.ScriptProvider;
 import dev.neovoxel.neobot.storage.StorageProvider;
 import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 
 import java.io.File;
 
-public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, SchedulerProvider, StorageProvider {
+public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, SchedulerProvider {
     default void enable() {
         try {
             getNeoLogger().info("Loading libraries...");
@@ -25,7 +26,8 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
             getNeoLogger().info("Loading config...");
             loadConfig(this);
             getNeoLogger().info("Loading storage...");
-            loadStorage(this);
+            setStorageProvider(new StorageProvider(this));
+            getStorageProvider().loadStorage();
             getNeoLogger().info("Loading game events...");
             setGameEventListener(new GameEventListener(this));
             getNeoLogger().info("Registering commands...");
@@ -64,7 +66,7 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
         getNeoLogger().info("Disconnecting to the bot...");
         getBotProvider().unloadBot();
         getNeoLogger().info("Saving data...");
-        closeStorage();
+        getStorageProvider().closeStorage();
     }
 
     default void reload(CommandSender sender) {
@@ -92,6 +94,54 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
         });
     }
 
+    @Override
+    default ScheduledTask submit(String scriptName, String functionName, long delay) {
+        return submit(() -> {
+            if (getScriptProvider().isScriptLoaded(scriptName)) {
+                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
+                if (value.canExecute()) {
+                    value.execute();
+                }
+            }
+        }, delay);
+    }
+
+    @Override
+    default ScheduledTask submitAsync(String scriptName, String functionName, long delay) {
+        return submitAsync(() -> {
+            if (getScriptProvider().isScriptLoaded(scriptName)) {
+                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
+                if (value.canExecute()) {
+                    value.execute();
+                }
+            }
+        }, delay);
+    }
+
+    @Override
+    default ScheduledTask submit(String scriptName, String functionName, long delay, long period) {
+        return submit(() -> {
+            if (getScriptProvider().isScriptLoaded(scriptName)) {
+                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
+                if (value.canExecute()) {
+                    value.execute();
+                }
+            }
+        }, delay, period);
+    }
+
+    @Override
+    default ScheduledTask submitAsync(String scriptName, String functionName, long delay, long period) {
+        return submitAsync(() -> {
+            if (getScriptProvider().isScriptLoaded(scriptName)) {
+                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
+                if (value.canExecute()) {
+                    value.execute();
+                }
+            }
+        }, delay, period);
+    }
+
     @HostAccess.Export
     NeoLogger getNeoLogger();
 
@@ -108,6 +158,11 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
     ScriptProvider getScriptProvider();
 
     void setScriptProvider(ScriptProvider scriptProvider);
+
+    @HostAccess.Export
+    StorageProvider getStorageProvider();
+
+    void setStorageProvider(StorageProvider storageProvider);
 
     CommandProvider getCommandProvider();
 

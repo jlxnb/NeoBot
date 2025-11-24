@@ -44,7 +44,7 @@ public class DataMigration {
                     oldConfig.getString("storage.database"));
         }
         // step 2: convert
-        plugin.getStorage().table("neobot_whitelist").create()
+        plugin.getStorageProvider().getStorage().table("neobot_whitelist").create()
                 .column("qq", "BIGINT", "PRIMARY KEY")
                 .column("players", "TEXT")
                 .execute();
@@ -55,7 +55,7 @@ public class DataMigration {
             for (String name : names) {
                 jsonArray.put(name);
             }
-            plugin.getStorage().table("neobot_whitelist")
+            plugin.getStorageProvider().getStorage().table("neobot_whitelist")
                     .insert()
                     .column("qq", Long.valueOf(qq))
                     .column("players", "'" + jsonArray + "'")

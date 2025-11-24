@@ -13,7 +13,7 @@ import dev.neovoxel.neobot.event.BukkitEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.script.ScriptProvider;
-import dev.neovoxel.nsapi.DatabaseStorage;
+import dev.neovoxel.neobot.storage.StorageProvider;
 import lombok.Getter;
 import lombok.Setter;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -36,6 +36,10 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
+    private StorageProvider storageProvider;
+
+    @Getter(onMethod_ = {@HostAccess.Export})
+    @Setter
     private EnhancedConfig messageConfig;
 
     @Getter(onMethod_ = {@HostAccess.Export})
@@ -45,10 +49,6 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
     private ScriptConfig scriptConfig;
-
-    @Getter(onMethod_ = {@HostAccess.Export})
-    @Setter
-    private DatabaseStorage storage;
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter

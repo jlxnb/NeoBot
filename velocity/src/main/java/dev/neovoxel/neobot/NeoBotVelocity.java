@@ -13,7 +13,7 @@ import dev.neovoxel.neobot.config.ScriptConfig;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.script.ScriptProvider;
-import dev.neovoxel.nsapi.DatabaseStorage;
+import dev.neovoxel.neobot.storage.StorageProvider;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -45,6 +45,10 @@ public class NeoBotVelocity implements NeoBot {
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
+    private StorageProvider storageProvider;
+
+    @Getter(onMethod_ = {@HostAccess.Export})
+    @Setter
     private EnhancedConfig messageConfig;
 
     @Getter(onMethod_ = {@HostAccess.Export})
@@ -54,10 +58,6 @@ public class NeoBotVelocity implements NeoBot {
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
     private ScriptConfig scriptConfig;
-
-    @Getter(onMethod_ = {@HostAccess.Export})
-    @Setter
-    private DatabaseStorage storage;
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter

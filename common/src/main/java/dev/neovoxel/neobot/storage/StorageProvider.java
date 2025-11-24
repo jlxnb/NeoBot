@@ -4,24 +4,31 @@ import com.zaxxer.hikari.HikariConfig;
 import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.nsapi.DatabaseStorage;
 import dev.neovoxel.nsapi.util.DatabaseStorageType;
+import lombok.Getter;
+import lombok.Setter;
 import org.graalvm.polyglot.HostAccess;
 import org.json.JSONObject;
 
 import java.io.File;
 
-public interface StorageProvider {
+public class StorageProvider {
 
-    void setStorage(DatabaseStorage storage);
+    @Getter(onMethod_ = {@HostAccess.Export})
+    @Setter
+    private DatabaseStorage storage;
 
-    @HostAccess.Export
-    DatabaseStorage getStorage();
+    @Getter(onMethod_ = {@HostAccess.Export})
+    @Setter
+    private String storageType;
 
-    @HostAccess.Export
-    String getStorageType();
+    private final NeoBot plugin;
 
-    void setStorageType(String type);
 
-    default void loadStorage(NeoBot plugin) throws Throwable {
+    public StorageProvider(NeoBot plugin) {
+        this.plugin = plugin;
+    }
+
+    public void loadStorage() throws Throwable {
         plugin.loadStorageApi();
         DatabaseStorageType storageType = DatabaseStorageType.valueOf(plugin.getGeneralConfig().getString("storage.type").toUpperCase());
         setStorageType(storageType.name().toLowerCase());
@@ -63,7 +70,7 @@ public interface StorageProvider {
         setStorage(storage);
     }
 
-    default void initDriver(DatabaseStorageType type) {
+    public void initDriver(DatabaseStorageType type) {
         try {
             if (type == DatabaseStorageType.H2) {
                 Class.forName("org.h2.Driver");
@@ -81,7 +88,7 @@ public interface StorageProvider {
         }
     }
 
-    default void closeStorage() {
+    public void closeStorage() {
         getStorage().save();
     }
 }

@@ -21,8 +21,6 @@ public class ScriptProvider {
     @Setter
     private boolean scriptSystemLoaded = false;
 
-    private final List<Script> scripts = new ArrayList<>();
-
     private final List<Value> placeholderParsers = new ArrayList<>();
     
     private final Map<String, Value> methods = new HashMap<>();
@@ -35,7 +33,7 @@ public class ScriptProvider {
 
     int pluginSchemaVersion = 1;
 
-    private final List<Context> contexts = new ArrayList<>();
+    private final Map<Script, Context> contexts = new HashMap<>();
 
     private static final Engine engine;
 
@@ -84,12 +82,8 @@ public class ScriptProvider {
         hostAccess = builder1.build();
     }
 
-    public void addLoadedScript(Script script) {
-        scripts.add(script);
-    }
-
     public boolean isScriptLoaded(Script script) {
-        return scripts.contains(script);
+        return contexts.containsKey(script);
     }
 
     public void loadScript(NeoBot plugin) throws Throwable {
@@ -180,14 +174,13 @@ public class ScriptProvider {
         context.getBindings("js").putMember("generalConfig", plugin.getScriptConfig());
         context.getBindings("js").putMember("scriptManager", this);
         context.eval("js", builder.toString());
-        addLoadedScript(script);
+        contexts.put(script, context);
         plugin.getNeoLogger().info("Loaded script " + script.getName());
     }
 
     public void unloadScript() {
-        contexts.forEach(Context::close);
+        contexts.values().forEach(Context::close);
         contexts.clear();
-        scripts.clear();
         placeholderParsers.clear();
         methods.clear();
     }
@@ -213,7 +206,7 @@ public class ScriptProvider {
 
     @HostAccess.Export
     public boolean isScriptLoaded(String name) {
-        return scripts.stream().anyMatch(script -> script.getName().equals(name));
+        return contexts.keySet().stream().anyMatch(script -> script.getName().equals(name));
     }
 
     @HostAccess.Export
@@ -229,5 +222,13 @@ public class ScriptProvider {
     @HostAccess.Export
     public Value callJsMethod(String name, Object... args) {
         return methods.get(name).execute(args);
+    }
+
+    public Script getScriptInfo(String name) {
+        return contexts.keySet().stream().filter(script -> script.getName().equals(name)).findFirst().orElse(null);
+    }
+
+    public Context getScriptContext(String name) {
+        return contexts.get(getScriptInfo(name));
     }
 }
