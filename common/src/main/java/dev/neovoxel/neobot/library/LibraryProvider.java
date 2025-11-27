@@ -86,7 +86,7 @@ public interface LibraryProvider {
         Dependency storageApi = Dependency.builder()
                 .groupId("dev.neovoxel.nsapi")
                 .artifactId("NeoStorageAPI")
-                .version("1.0.0")
+                .version("1.1.0")
                 .build();
         JarFlow.loadDependency(storageApi);
     }

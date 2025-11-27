@@ -33,7 +33,7 @@ subprojects {
         compileOnly("org.graalvm.js:js:22.0.0.2")
 
         // storage
-        compileOnly("dev.neovoxel.nsapi:NeoStorageAPI:1.0.0")
+        compileOnly("dev.neovoxel.nsapi:NeoStorageAPI:1.1.0")
         compileOnly("com.zaxxer:HikariCP:4.0.3")
         compileOnly("com.mysql:mysql-connector-j:8.2.0")
         compileOnly("org.mariadb.jdbc:mariadb-java-client:3.5.6")
