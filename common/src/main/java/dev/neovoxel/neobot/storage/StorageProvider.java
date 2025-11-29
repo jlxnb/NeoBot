@@ -37,7 +37,7 @@ public class StorageProvider {
         String host = plugin.getGeneralConfig().getString("storage.host");
         int port = plugin.getGeneralConfig().getInt("storage.port");
         String database = plugin.getGeneralConfig().getString("storage.database");
-        StringBuilder jdbcUrl = new StringBuilder(DatabaseStorage.generateJdbcUrl(storageType, host, port, database));
+        StringBuilder jdbcUrl = new StringBuilder(generateJdbcUrl(storageType, host, port, database));
         String jdbcUrl2;
         if (storageType == DatabaseStorageType.H2) {
             jdbcUrl2 = "jdbc:" + storageType.name().toLowerCase() + ":file:" + new File(plugin.getDataFolder(), database).getAbsolutePath();
@@ -90,5 +90,9 @@ public class StorageProvider {
 
     public void closeStorage() {
         getStorage().save();
+    }
+
+    private String generateJdbcUrl(DatabaseStorageType type, String host, int port, String database) {
+        return "jdbc:" + type.toString().toLowerCase() + "://" + host + ":" + port + "/" + database;
     }
 }
