@@ -7,7 +7,9 @@ import dev.neovoxel.neobot.adapter.Player;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameEventListener {
@@ -27,6 +29,18 @@ public class GameEventListener {
     @HostAccess.Export
     public void register(String eventName, Value method) {
         if (method.canExecute()) map.put(method, eventName);
+    }
+
+    public void clearUuidContext(String uuid) {
+        List<Value> toRemove = new ArrayList<>();
+        for (Map.Entry<Value, String> entry : map.entrySet()) {
+            if (entry.getKey().getContext().getBindings("js").getMember("__uuid__").asString().equals(uuid)) {
+                toRemove.add(entry.getKey());
+            }
+        }
+        for (Value value : toRemove) {
+            map.remove(value);
+        }
     }
 
     private void fireEvent(String eventName, Object... args) {

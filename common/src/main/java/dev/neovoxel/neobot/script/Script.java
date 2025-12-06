@@ -10,6 +10,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class Script {
     private final int schemaVersion;
+    private final String id;
     private final String name;
     private final String author;
     private final String version;
@@ -20,14 +21,14 @@ public class Script {
     private final File entrypoint;
 
     public String toExpression() {
-        return author + ":" + name + ":" + version;
+        return author + ":" + id + ":" + version;
     }
 
     public boolean checkDepends(Collection<Script> checkedScripts) {
         for (String dependency : depends) {
             boolean found = false;
             for (Script checkedScript : checkedScripts) {
-                if (checkedScript.getName().equals(dependency)) {
+                if (checkedScript.getId().equals(dependency)) {
                     found = true;
                     break;
                 }
@@ -46,20 +47,20 @@ public class Script {
 
         Map<String, Script> scriptMap = new HashMap<>();
         for (Script script : scripts) {
-            scriptMap.put(script.getName(), script);
+            scriptMap.put(script.getId(), script);
         }
 
         Map<String, Set<String>> graph = new HashMap<>();
         Map<String, Integer> inDegree = new HashMap<>();
 
         for (Script script : scripts) {
-            String scriptName = script.getName();
+            String scriptName = script.getId();
             graph.putIfAbsent(scriptName, new HashSet<>());
             inDegree.putIfAbsent(scriptName, 0);
         }
 
         for (Script script : scripts) {
-            String currentScript = script.getName();
+            String currentScript = script.getId();
 
             for (String afterDependency : script.getLoadafter()) {
                 if (scriptMap.containsKey(afterDependency)) {

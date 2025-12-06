@@ -4,12 +4,19 @@ import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.neobot.adapter.CommandSender;
 import dev.neovoxel.neobot.migrate.ConfigMigration;
 import dev.neovoxel.neobot.migrate.DataMigration;
+import dev.neovoxel.neobot.script.Script;
+import dev.neovoxel.neobot.script.remote.RemoteScript;
+import dev.neovoxel.neobot.script.remote.Repository;
+import dev.neovoxel.nsapi.entity.Row;
+import dev.neovoxel.nsapi.table.DatabaseTable;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public abstract class CommandProvider {
     private final List<String> helpMessages = new ArrayList<>();
@@ -78,6 +85,251 @@ public abstract class CommandProvider {
                         }
                     } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
                 }
+            } else if (args[0].equalsIgnoreCase("script")) {
+                if (args[1].equalsIgnoreCase("list")) {
+                    if (sender.hasPermission("neobot.command.script")) {
+                        sender.sendMessage(plugin.getMessageConfig().getMessage("internal.script.list.head"));
+                        for (Script script : plugin.getScriptProvider().getLoadedScripts()) {
+                            for (String message : plugin.getMessageConfig().getStringArray("internal.script.list.single")) {
+                                message = message
+                                        .replace("${id}", script.getId())
+                                        .replace("${name}", script.getName())
+                                        .replace("${version}", script.getVersion())
+                                        .replace("${author}", script.getAuthor())
+                                        .replace("${description}", script.getDescription());
+                                sender.sendMessage(message);
+                            }
+                        }
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                } else if (args[1].equalsIgnoreCase("reload")) {
+                    if (sender.hasPermission("neobot.command.script")) {
+                        plugin.getNeoLogger().info("Reloading scripts...");
+                        plugin.getScriptScheduler().cancelAllTasks();
+                        plugin.getScriptProvider().setScriptSystemLoaded(false);
+                        plugin.getScriptProvider().unloadScript();
+                        try {
+                            plugin.getScriptProvider().loadScript(plugin);
+                        } catch (Throwable e) {
+                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.script.reload.error")
+                                    .replace("${error}", e.getMessage()));
+                        }
+                        sender.sendMessage(plugin.getMessageConfig().getMessage("internal.script.reload.success"));
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                }
+            } else if (args[0].equalsIgnoreCase("repo")) {
+                if (args[1].equalsIgnoreCase("list")) {
+                    if (sender.hasPermission("neobot.command.repo")) {
+                        DatabaseTable table = plugin.getStorageProvider().getStorage()
+                                .table("neobot_repo");
+                        table.create()
+                                .column("url", "TEXT", "PRIMARY KEY")
+                                .column("name", "TEXT")
+                                .execute();
+                        List<Row> result = table.select("url", "name").execute().map();
+                        sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.list.head"));
+                        for (Row row : result) {
+                            String name = row.getString("name");
+                            String url = row.getString("url");
+                            if (Objects.equals(name, url)) {
+                                for (String message : plugin.getMessageConfig().getStringArray("internal.repo.list.single-without-name")) {
+                                    message = message.replace("${url}", url);
+                                    sender.sendMessage(message);
+                                }
+                            } else {
+                                for (String message : plugin.getMessageConfig().getStringArray("internal.repo.list.single-with-name")) {
+                                    message = message
+                                            .replace("${name}", name)
+                                            .replace("${url}", url);
+                                    sender.sendMessage(message);
+                                }
+                            }
+                        }
+                    } else {
+                        sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                    }
+                }
+            }
+        } else if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("script")) {
+                if (args[1].equalsIgnoreCase("load")) {
+                    if (sender.hasPermission("neobot.command.script")) {
+                        sender.sendMessage(plugin.getScriptProvider().loadScript(plugin, args[2]));
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                } else if (args[1].equalsIgnoreCase("unload")) {
+                    if (sender.hasPermission("neobot.command.script")) {
+                        boolean result = plugin.getScriptProvider().unloadScript(args[2]);
+                        if (result) {
+                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.script.unload.success"));
+                        } else {
+                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.script.unload.error"));
+                        }
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                } else if (args[1].equalsIgnoreCase("info")) {
+                    if (sender.hasPermission("neobot.command.script")) {
+                        Script script = plugin.getScriptProvider().getScriptInfo(args[2]);
+                        if (script == null) {
+                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.script.info.not-found"));
+                            return;
+                        }
+                        for (String s : plugin.getMessageConfig().getStringArray("internal.script.info.single")) {
+                            sender.sendMessage(s
+                                    .replace("${id}", script.getId())
+                                    .replace("${name}", script.getName())
+                                    .replace("${version}", script.getVersion())
+                                    .replace("${author}", script.getAuthor())
+                                    .replace("${description}", script.getDescription()));
+                        }
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                }
+            } else if (args[0].equalsIgnoreCase("repo")) {
+                if (args[1].equalsIgnoreCase("add")) {
+                    if (sender.hasPermission("neobot.command.repo")) {
+                        String url = args[2];
+                        DatabaseTable table = plugin.getStorageProvider().getStorage()
+                                .table("neobot_repo");
+                        table.create()
+                                .column("url", "TEXT", "PRIMARY KEY")
+                                .column("name", "TEXT")
+                                .execute();
+                        if (!table.select("url").where("url", url).execute().map().isEmpty()) {
+                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.add.exists"));
+                            return;
+                        }
+                        plugin.getStorageProvider().getStorage()
+                                .table("neobot_repo")
+                                .insert()
+                                .column("url", url)
+                                .column("name", url)
+                                .execute();
+                        sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.add.success")
+                                .replace("${url}", url));
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                } else if (args[1].equalsIgnoreCase("remove")) {
+                    if (sender.hasPermission("neobot.command.repo")) {
+                        String url = args[2];
+                        DatabaseTable table = plugin.getStorageProvider().getStorage()
+                                .table("neobot_repo");
+                        table.create()
+                                .column("url", "TEXT", "PRIMARY KEY")
+                                .column("name", "TEXT")
+                                .execute();
+                        if (table.select("url").where("url", url).execute().map().isEmpty()) {
+                            List<Row> results = table.select("url").where("name", url).execute().map();
+                            if (results.isEmpty()) {
+                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.remove.not-found"));
+                            } else {
+                                table.delete()
+                                        .where("name", url)
+                                        .execute();
+                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.remove.success")
+                                        .replace("${name}", url)
+                                        .replace("${url}", results.get(0).getString("url")));
+                            }
+                        } else {
+                            table.delete()
+                                    .where("url", url)
+                                    .execute();
+                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.remove.success")
+                                    .replace("${name}", url)
+                                    .replace("${url}", url));
+                        }
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                } else if (args[1].equalsIgnoreCase("scriptlist")) {
+                    if (sender.hasPermission("neobot.command.repo")) {
+                        String arg = args[2];
+                        String url;
+                        DatabaseTable table = plugin.getStorageProvider().getStorage()
+                                .table("neobot_repo");
+                        table.create()
+                                .column("url", "TEXT", "PRIMARY KEY")
+                                .column("name", "TEXT")
+                                .execute();
+                        if (table.select("url").where("url", arg).execute().map().isEmpty()) {
+                            if (table.select("url").where("name", arg).execute().map().isEmpty()) {
+                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.scriptlist.not-found"));
+                                return;
+                            } else {
+                                url = table.select("url")
+                                        .where("name", arg)
+                                        .execute()
+                                        .getFirst()
+                                        .getString("url");
+                            }
+                        } else {
+                            url = arg;
+                        }
+                        plugin.submitAsync(() -> {
+                            Repository repo = new Repository(url);
+                            try {
+                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.scriptlist.head"));
+                                repo.fetch();
+                                repo.getScripts().forEach(script -> {
+                                    for (String message : plugin.getMessageConfig().getStringArray("internal.repo.scriptlist.single")) {
+                                        sender.sendMessage(message
+                                                .replace("${id}", script.getId())
+                                                .replace("${name}", script.getName())
+                                                .replace("${version}", script.getVersion())
+                                                .replace("${author}", script.getAuthor())
+                                                .replace("${description}", script.getDescription()));
+                                    }
+                                });
+                            } catch (Exception e) {
+                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.scriptlist.error")
+                                        .replace("${error}", e.getMessage()));
+                            }
+                        });
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                } else if (args[1].equalsIgnoreCase("install")) {
+                    if (sender.hasPermission("neobot.command.repo")) {
+                        String id = args[2];
+                        plugin.submitAsync(() -> {
+                            DatabaseTable table = plugin.getStorageProvider().getStorage()
+                                    .table("neobot_repo");
+                            table.create()
+                                    .column("url", "TEXT", "PRIMARY KEY")
+                                    .column("name", "TEXT")
+                                    .execute();
+                            List<Row> list = table.select("name", "url")
+                                    .execute()
+                                    .map();
+                            for (Row row : list) {
+                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.install.fetching")
+                                        .replace("${name}", row.getString("name")));
+                                String url = row.getString("url");
+                                Repository repository = new Repository(url);
+                                boolean finished = false;
+                                try {
+                                    repository.fetch();
+                                    for (RemoteScript script : repository.getScripts()) {
+                                        if (script.getId().equalsIgnoreCase(id)) {
+                                            finished = true;
+                                            sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.install.start"));
+                                            String dir = script.download(plugin);
+                                            if (dir.isEmpty()) {
+                                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.install.success-download")
+                                                        .replace("${id}", script.getId())
+                                                        .replace("${name}", script.getName())
+                                                        .replace("${author}", script.getAuthor())
+                                                        .replace("${version}", script.getVersion()));
+                                            } else {
+                                                plugin.getScriptProvider().loadScript(plugin, dir);
+                                                sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.install.success")
+                                                    .replace("${id}", script.getId())
+                                                    .replace("${name}", script.getName())
+                                                    .replace("${author}", script.getAuthor())
+                                                    .replace("${version}", script.getVersion()));
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.install.error")
+                                            .replace("${error}", e.getMessage()));
+                                }
+                                if (finished) break;
+                            }
+                        });
+                    } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
+                }
             }
         }
         methods.forEach(method -> method.execute(sender, args));
@@ -93,5 +345,9 @@ public abstract class CommandProvider {
         if (value.canExecute()) {
             methods.add(value);
         }
+    }
+
+    public void clearUuidContext(String uuid) {
+        methods.removeIf(value -> value.getContext().getBindings("js").getMember("__uuid__").asString().equals(uuid));
     }
 }

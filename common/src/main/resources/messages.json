@@ -7,7 +7,17 @@
       "&a/neobot reload   &b- 重载插件",
       "&a/neobot migrate   &b- 从 AQQBot (v2) 迁移配置和数据",
       "&a/neobot migrate config   &b- 从 AQQBot (v2) 迁移配置",
-      "&a/neobot migrate data   &b- 从 AQQBot (v2) 迁移数据"
+      "&a/neobot migrate data   &b- 从 AQQBot (v2) 迁移数据",
+      "&a/neobot script list   &b- 查看所有已加载的脚本",
+      "&a/neobot script load <dir>   &b- 加载指定文件夹的脚本",
+      "&a/neobot script unload <name>   &b- 卸载指定已加载脚本",
+      "&a/neobot script info <name>   &b- 查看指定已加载脚本详细信息",
+      "&a/neobot script reload   &b- 重载所有已加载脚本",
+      "&a/neobot repo add <url> [name]   &b- 添加远程脚本仓库",
+      "&a/neobot repo remove <url/name>   &b- 移除远程脚本仓库",
+      "&a/neobot repo list   &b- 查看所有已添加的远程仓库",
+      "&a/neobot repo scriptlist [url/name]   &b- 获取远程脚本仓库的所有脚本",
+      "&a/neobot repo install <name> [version]   &b- 从远程脚本仓库安装脚本"
     ],
     "reload": {
       "reloading": "&a正在重载插件...",
@@ -19,6 +29,72 @@
       "start-migrating-data": "&b开始迁移数据",
       "no-config": "&c未检测到可迁移的 ${config} 配置文件!",
       "success": "&a迁移成功!"
+    },
+    "script": {
+      "list": {
+        "head": "&6NeoBot 已加载脚本列表:",
+        "single": [
+          "&f- &a${name} &b(${version})"
+        ]
+      },
+      "reload": {
+        "success": "&a成功重载脚本系统!",
+        "error": "&c无法重载脚本系统: ${error}"
+      },
+      "load": {
+        "not-found": "&c未找到该脚本文件夹!",
+        "manifest-not-found": "&c未找到脚本信息文件 (manifest.json)!",
+        "too-new": "&c你的插件不支持该脚本 (脚本支持 ${current} > 插件支持 ${supported})!",
+        "error": "&c在加载脚本的过程中出现了错误: ${error}",
+        "success": "&a成功加载脚本 ${name}!"
+      },
+      "unload": {
+        "error": "&c未找到该脚本或该脚本被其它脚本所依赖!",
+        "success": "&a成功卸载该脚本!"
+      },
+      "info": {
+        "not-found": "&c未找到该脚本!",
+        "single": [
+          "&a${name} &bv${version}",
+          "- &cID: ${id}",
+          "- &d作者: ${author}",
+          "- &e介绍: ${description}"
+        ]
+      }
+    },
+    "repo": {
+      "add": {
+        "success": "&a成功添加脚本仓库 ${url}!",
+        "exists": "&c该仓库已存在!"
+      },
+      "remove": {
+        "success": "&a成功移除脚本仓库 ${name}!",
+        "not-found": "&c未找到该仓库!"
+      },
+      "list": {
+        "head": "&6NeoBot 脚本仓库列表:",
+        "single-with-name": [
+          "&f- &a${name} &b(${url})"
+        ],
+        "single-without-name": [
+          "&f- &b${url}"
+        ]
+      },
+      "scriptlist": {
+        "not-found": "&c未找到该仓库!",
+        "error": "&c在获取仓库信息时出现了错误: ${error}",
+        "head": "&6仓库脚本列表: ",
+        "single": [
+          "&f- &a${name} &b(${version}) (ID: ${id})"
+        ]
+      },
+      "install": {
+        "fetching": "&e尝试从仓库 ${name} 获取脚本...",
+        "error": "&c在安装脚本时出现了错误: ${error}",
+        "start": "&a开始安装脚本...",
+        "success": "&a成功下载并加载脚本!",
+        "success-download": "&a成功下载脚本集! &e(该脚本集由多个脚本组成, 请你手动 /neobot script reload 加载)"
+      }
     },
     "no-permission": "&cYou don't have permission to do this!"
   }

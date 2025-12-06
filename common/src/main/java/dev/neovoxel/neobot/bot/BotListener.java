@@ -21,6 +21,7 @@ import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BotListener implements NBotListener {
@@ -39,6 +40,18 @@ public class BotListener implements NBotListener {
                 client.action(new SendGroupMessage(groupId, new JSONArray(message)));
             }
         });
+    }
+
+    public void clearUuidContext(String uuid) {
+        List<Value> toRemove = new ArrayList<>();
+        for (Map.Entry<Value, String> entry : map.entrySet()) {
+            if (entry.getKey().getContext().getBindings("js").getMember("__uuid__").asString().equals(uuid)) {
+                toRemove.add(entry.getKey());
+            }
+        }
+        for (Value value : toRemove) {
+            map.remove(value);
+        }
     }
 
     @HostAccess.Export

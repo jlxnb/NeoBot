@@ -2,6 +2,7 @@ package dev.neovoxel.neobot.script;
 
 import dev.neovoxel.jarflow.JarFlow;
 import dev.neovoxel.neobot.NeoBot;
+import dev.neovoxel.neobot.util.ValueWithScript;
 import lombok.Getter;
 import lombok.Setter;
 import org.graalvm.polyglot.Context;
@@ -21,9 +22,9 @@ public class ScriptProvider {
     @Setter
     private boolean scriptSystemLoaded = false;
 
-    private final List<Value> placeholderParsers = new ArrayList<>();
+    private final List<ValueWithScript> placeholderParsers = new ArrayList<>();
     
-    private final Map<String, Value> methods = new HashMap<>();
+    private final Map<String, ValueWithScript> methods = new HashMap<>();
 
     private final NeoBot plugin;
 
@@ -109,6 +110,7 @@ public class ScriptProvider {
             }
             Script script = new Script(
                     schemaVersion,
+                    jsonObject.getString("id"),
                     jsonObject.getString("name"),
                     jsonObject.getString("author"),
                     jsonObject.getString("version"),
@@ -138,7 +140,7 @@ public class ScriptProvider {
         List<Script> checkedScripts = new ArrayList<>();
         for (Script script : sortedScripts) {
             if (!script.checkDepends(sortedScripts)) {
-                plugin.getNeoLogger().warn("The script " + script.getName() + " is missing dependencies, it needs: " +
+                plugin.getNeoLogger().warn("The script " + script.getId() + " is missing dependencies, it needs: " +
                         Arrays.toString(script.getDepends().toArray()));
             } else {
                 checkedScripts.add(script);
@@ -149,10 +151,78 @@ public class ScriptProvider {
         }
         scriptSystemLoaded = true;
     }
+    
+    public String loadScript(NeoBot plugin, String dir) {
+        File scriptPath = new File(plugin.getDataFolder(), "scripts");
+        if (!scriptPath.exists()) {
+            plugin.getMessageConfig().getMessage("internal.script.load.not-found");
+        }
+        File file = new File(scriptPath, dir);
+        if (!file.exists()) {
+            plugin.getMessageConfig().getMessage("internal.script.load.not-found");
+        }
+        if (!file.isDirectory()) {
+            plugin.getMessageConfig().getMessage("internal.script.load.not-found");
+        }
+        File manifest = new File(file, "manifest.json");
+        if (!manifest.exists()) {
+            plugin.getMessageConfig().getMessage("internal.script.load.manifest-not-found");
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(new String(Files.readAllBytes(manifest.toPath())));
+        } catch (IOException e) {
+            return plugin.getMessageConfig().getMessage("internal.script.load.error")
+                    .replace("${error}", e.getMessage());
+        }
+        int schemaVersion = jsonObject.getInt("schema_version");
+        if (schemaVersion > pluginSchemaVersion) {
+            plugin.getMessageConfig().getMessage("internal.script.load.too-new")
+                    .replace("supported", String.valueOf(pluginSchemaVersion))
+                    .replace("current", String.valueOf(schemaVersion));
+        }
+        Script script = new Script(
+                schemaVersion,
+                jsonObject.getString("id"),
+                jsonObject.getString("name"),
+                jsonObject.getString("author"),
+                jsonObject.getString("version"),
+                new File(file, jsonObject.getString("entrypoint"))
+        );
+        if (jsonObject.has("description")) {
+            script.setDescription(jsonObject.getString("description"));
+        }
+        if (jsonObject.has("loadbefore")) {
+            for (Object object : jsonObject.getJSONArray("loadbefore")) {
+                script.getLoadbefore().add(object.toString());
+            }
+        }
+        if (jsonObject.has("loadafter")) {
+            for (Object object : jsonObject.getJSONArray("loadafter")) {
+                script.getLoadafter().add(object.toString());
+            }
+        }
+        if (jsonObject.has("depends")) {
+            for (Object object : jsonObject.getJSONArray("depends")) {
+                script.getDepends().add(object.toString());
+            }
+        }
+        try {
+            loadScript(plugin, script);
+        } catch (Throwable e) {
+            return plugin.getMessageConfig().getMessage("internal.script.load.error")
+                    .replace("error", e.getMessage());
+        }
+        return plugin.getMessageConfig().getMessage("internal.script.load.success")
+                .replace("${id}",script.getId())
+                .replace("${name}", script.getName())
+                .replace("${author}", script.getAuthor())
+                .replace("${version}", script.getVersion());
+    }
 
     public void loadScript(NeoBot plugin, Script script) throws Throwable {
         if (!script.getEntrypoint().exists()) {
-            plugin.getNeoLogger().warn("The script " + script.getName() + " is missing the entrypoint file.");
+            plugin.getNeoLogger().warn("The script " + script.getId() + " is missing the entrypoint file.");
         }
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(script.getEntrypoint()), StandardCharsets.UTF_8));
         StringBuilder builder = new StringBuilder();
@@ -166,6 +236,7 @@ public class ScriptProvider {
                 .allowCreateThread(true)
                 .engine(engine)
                 .build();
+        String uuid = UUID.randomUUID().toString();
         context.getBindings("js").putMember("qq", plugin.getBotProvider().getBotListener());
         context.getBindings("js").putMember("plugin", plugin);
         context.getBindings("js").putMember("gameEvent", plugin.getGameEventListener());
@@ -173,9 +244,38 @@ public class ScriptProvider {
         context.getBindings("js").putMember("messageConfig", plugin.getMessageConfig());
         context.getBindings("js").putMember("generalConfig", plugin.getScriptConfig());
         context.getBindings("js").putMember("scriptManager", this);
-        context.eval("js", builder.toString());
+        context.getBindings("js").putMember("__uuid__", uuid);
         contexts.put(script, context);
-        plugin.getNeoLogger().info("Loaded script " + script.getName());
+        context.eval("js", builder.toString());
+        plugin.getNeoLogger().info("Loaded script " + script.getId());
+    }
+
+    public boolean unloadScript(String id) {
+        for (Map.Entry<Script, Context> entry : contexts.entrySet()) {
+            if (entry.getKey().getId().equalsIgnoreCase(id)) {
+                String uuid = entry.getValue().getBindings("js").getMember("__uuid__").asString();
+                for (Map.Entry<Script, Context> contextEntry : contexts.entrySet()) {
+                    if (contextEntry.getKey().getDepends().contains(id)) {
+                        return false;
+                    }
+                }
+                List<String> toRemove = new ArrayList<>();
+                for (Map.Entry<String, ValueWithScript> method : methods.entrySet()) {
+                    if (method.getValue().getScript().getId().equalsIgnoreCase(id)) {
+                        toRemove.add(method.getKey());
+                    }
+                }
+                toRemove.forEach(methods::remove);
+                placeholderParsers.removeIf(method -> method.getScript().getId().equalsIgnoreCase(id));
+                plugin.getBotProvider().getBotListener().clearUuidContext(uuid);
+                plugin.getGameEventListener().clearUuidContext(uuid);
+                plugin.getCommandProvider().clearUuidContext(uuid);
+                plugin.getScriptScheduler().clearUuidContext(uuid);
+                entry.getValue().close();
+                return true;
+            }
+        }
+        return false;
     }
 
     public void unloadScript() {
@@ -191,27 +291,38 @@ public class ScriptProvider {
 
     @HostAccess.Export
     public void loadParser(Value value) {
-        if (value.canExecute()) {
-            placeholderParsers.add(value);
+        if (!value.canExecute()) {
+            return;
+        }
+        for (Map.Entry<Script, Context> entry : contexts.entrySet()) {
+            if (entry.getValue().getBindings("js").getMember("__uuid__").asString().equals(
+                    value.getContext().getBindings("js").getMember("__uuid__").asString())) {
+                placeholderParsers.add(new ValueWithScript(value, entry.getKey()));
+            }
         }
     }
 
     @HostAccess.Export
     public String parse(String content) {
-        for (Value value : placeholderParsers) {
-            content = value.execute(content).asString();
+        for (ValueWithScript value : placeholderParsers) {
+            content = value.getValue().execute(content).asString();
         }
         return content;
     }
 
     @HostAccess.Export
-    public boolean isScriptLoaded(String name) {
-        return contexts.keySet().stream().anyMatch(script -> script.getName().equals(name));
+    public boolean isScriptLoaded(String id) {
+        return contexts.keySet().stream().anyMatch(script -> script.getId().equals(id));
     }
 
     @HostAccess.Export
     public void addJsMethod(String name, Value value) {
-        methods.put(name, value);
+        for (Map.Entry<Script, Context> entry : contexts.entrySet()) {
+            if (Objects.equals(entry.getValue().getBindings("js").getMember("__uuid__").asString(),
+                    value.getContext().getBindings("js").getMember("__uuid__").asString())) {
+                methods.put(name, new ValueWithScript(value, entry.getKey()));
+            }
+        }
     }
 
     @HostAccess.Export
@@ -221,14 +332,18 @@ public class ScriptProvider {
 
     @HostAccess.Export
     public Value callJsMethod(String name, Object... args) {
-        return methods.get(name).execute(args);
+        return methods.get(name).getValue().execute(args);
     }
 
-    public Script getScriptInfo(String name) {
-        return contexts.keySet().stream().filter(script -> script.getName().equals(name)).findFirst().orElse(null);
+    public Script getScriptInfo(String id) {
+        return contexts.keySet().stream().filter(script -> script.getId().equals(id)).findFirst().orElse(null);
     }
 
     public Context getScriptContext(String name) {
         return contexts.get(getScriptInfo(name));
+    }
+
+    public Set<Script> getLoadedScripts() {
+        return contexts.keySet();
     }
 }

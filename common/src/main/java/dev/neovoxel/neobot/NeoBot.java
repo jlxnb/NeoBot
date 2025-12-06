@@ -9,12 +9,11 @@ import dev.neovoxel.neobot.config.ConfigProvider;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.game.GameProvider;
 import dev.neovoxel.neobot.library.LibraryProvider;
-import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.scheduler.SchedulerProvider;
 import dev.neovoxel.neobot.script.ScriptProvider;
+import dev.neovoxel.neobot.script.ScriptScheduler;
 import dev.neovoxel.neobot.storage.StorageProvider;
 import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.Value;
 
 import java.io.File;
 
@@ -39,6 +38,7 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
             getNeoLogger().info("Loading script system...");
             submitAsync(() -> {
                 try {
+                    setScriptScheduler(new ScriptScheduler(this));
                     ScriptProvider scriptProvider = new ScriptProvider(this);
                     setScriptProvider(scriptProvider);
                     getScriptProvider().loadScript(this);
@@ -63,6 +63,7 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
         getGameEventListener().reset();
         getNeoLogger().info("Cancelling all the tasks...");
         cancelAllTasks();
+        getScriptScheduler().clear();
         getNeoLogger().info("Disconnecting to the bot...");
         getBotProvider().unloadBot();
         getNeoLogger().info("Saving data...");
@@ -73,6 +74,7 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
         getGameEventListener().onPrePluginReload();
         getScriptProvider().setScriptSystemLoaded(false);
         cancelAllTasks();
+        getScriptScheduler().clear();
         getNeoLogger().info("Reloading config...");
         reloadConfig(this);
         submitAsync(() -> {
@@ -94,54 +96,6 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
         });
     }
 
-    @Override
-    default ScheduledTask submit(String scriptName, String functionName, long delay) {
-        return submit(() -> {
-            if (getScriptProvider().isScriptLoaded(scriptName)) {
-                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
-                if (value.canExecute()) {
-                    value.execute();
-                }
-            }
-        }, delay);
-    }
-
-    @Override
-    default ScheduledTask submitAsync(String scriptName, String functionName, long delay) {
-        return submitAsync(() -> {
-            if (getScriptProvider().isScriptLoaded(scriptName)) {
-                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
-                if (value.canExecute()) {
-                    value.execute();
-                }
-            }
-        }, delay);
-    }
-
-    @Override
-    default ScheduledTask submit(String scriptName, String functionName, long delay, long period) {
-        return submit(() -> {
-            if (getScriptProvider().isScriptLoaded(scriptName)) {
-                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
-                if (value.canExecute()) {
-                    value.execute();
-                }
-            }
-        }, delay, period);
-    }
-
-    @Override
-    default ScheduledTask submitAsync(String scriptName, String functionName, long delay, long period) {
-        return submitAsync(() -> {
-            if (getScriptProvider().isScriptLoaded(scriptName)) {
-                Value value = getScriptProvider().getScriptContext(scriptName).getBindings("js").getMember(functionName);
-                if (value.canExecute()) {
-                    value.execute();
-                }
-            }
-        }, delay, period);
-    }
-
     @HostAccess.Export
     NeoLogger getNeoLogger();
 
@@ -158,6 +112,11 @@ public interface NeoBot extends ConfigProvider, GameProvider, LibraryProvider, S
     ScriptProvider getScriptProvider();
 
     void setScriptProvider(ScriptProvider scriptProvider);
+
+    @HostAccess.Export
+    ScriptScheduler getScriptScheduler();
+
+    void setScriptScheduler(ScriptScheduler scriptScheduler);
 
     @HostAccess.Export
     StorageProvider getStorageProvider();

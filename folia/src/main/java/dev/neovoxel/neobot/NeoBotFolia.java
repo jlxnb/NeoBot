@@ -8,40 +8,34 @@ import org.graalvm.polyglot.HostAccess;
 import java.util.concurrent.TimeUnit;
 
 public class NeoBotFolia extends NeoBotBukkit {
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task) {
         return new FoliaScheduledTask(Bukkit.getGlobalRegionScheduler().run(this, (task1) -> task.run()));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task) {
         return new FoliaScheduledTask(Bukkit.getAsyncScheduler().runNow(this, (task1) -> task.run()));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task, long delay) {
         return new FoliaScheduledTask(Bukkit.getGlobalRegionScheduler().runDelayed(this, (task1) -> task.run(),
                 delay * 20));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task, long delay) {
         return new FoliaScheduledTask(Bukkit.getAsyncScheduler().runDelayed(this, (task1) -> task.run(),
                 delay, TimeUnit.SECONDS));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task, long delay, long period) {
         return new FoliaScheduledTask(Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, (task1) -> task.run(),
                 delay * 20, period * 20));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task, long delay, long period) {
         return new FoliaScheduledTask(Bukkit.getAsyncScheduler().runAtFixedRate(this, (task1) -> task.run(),

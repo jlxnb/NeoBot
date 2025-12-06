@@ -13,6 +13,7 @@ import dev.neovoxel.neobot.config.ScriptConfig;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.script.ScriptProvider;
+import dev.neovoxel.neobot.script.ScriptScheduler;
 import dev.neovoxel.neobot.storage.StorageProvider;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,6 +47,10 @@ public class NeoBotVelocity implements NeoBot {
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
     private StorageProvider storageProvider;
+
+    @Getter(onMethod_ = {@HostAccess.Export})
+    @Setter
+    private ScriptScheduler scriptScheduler;
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
@@ -94,6 +99,7 @@ public class NeoBotVelocity implements NeoBot {
     public void registerCommands() {
         VelocityCommandProvider commandProvider1 = new VelocityCommandProvider(this);
         commandProvider1.registerCommand();
+        setCommandProvider(commandProvider1);
     }
 
     @HostAccess.Export
@@ -143,39 +149,33 @@ public class NeoBotVelocity implements NeoBot {
         return message;
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task) {
         return new VelocitySchedulerTask(proxyServer.getScheduler().buildTask(this, task).schedule());
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task) {
         return submit(task);
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task, long delay) {
         return new VelocitySchedulerTask(proxyServer.getScheduler().buildTask(this, task)
                 .delay(Duration.ofSeconds(delay)).schedule());
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task, long delay) {
         return submit(task, delay);
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task, long delay, long period) {
         return new VelocitySchedulerTask(proxyServer.getScheduler().buildTask(this, task)
                 .delay(Duration.ofSeconds(delay)).repeat(Duration.ofSeconds(period)).schedule());
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task, long delay, long period) {
         return submit(task, delay, period);

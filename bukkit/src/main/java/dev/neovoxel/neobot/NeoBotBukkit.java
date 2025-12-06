@@ -13,6 +13,7 @@ import dev.neovoxel.neobot.event.BukkitEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.script.ScriptProvider;
+import dev.neovoxel.neobot.script.ScriptScheduler;
 import dev.neovoxel.neobot.storage.StorageProvider;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,6 +38,10 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
     private StorageProvider storageProvider;
+
+    @Getter(onMethod_ = {@HostAccess.Export})
+    @Setter
+    private ScriptScheduler scriptScheduler;
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
@@ -69,37 +74,31 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
         this.gameEventListener = listener;
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task) {
         return new BukkitScheduledTask(Bukkit.getScheduler().runTask(this, task));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task) {
         return new BukkitScheduledTask(Bukkit.getScheduler().runTaskAsynchronously(this, task));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task, long delay) {
         return new BukkitScheduledTask(Bukkit.getScheduler().runTaskLater(this, task, delay * 20));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task, long delay) {
         return new BukkitScheduledTask(Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay * 20));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submit(Runnable task, long delay, long period) {
         return new BukkitScheduledTask(Bukkit.getScheduler().runTaskTimer(this, task, delay * 20, period * 20));
     }
 
-    @HostAccess.Export
     @Override
     public ScheduledTask submitAsync(Runnable task, long delay, long period) {
         return new BukkitScheduledTask(Bukkit.getScheduler().runTaskTimerAsynchronously(this, task, delay * 20, period * 20));
@@ -130,6 +129,7 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     public void registerCommands() {
         BukkitCommandProvider commandProvider1 = new BukkitCommandProvider(this);
         commandProvider1.registerCommand();
+        setCommandProvider(commandProvider1);
     }
 
     @HostAccess.Export
