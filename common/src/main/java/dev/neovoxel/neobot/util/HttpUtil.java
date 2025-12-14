@@ -10,8 +10,8 @@ import java.util.*;
 
 public class HttpUtil {
 
-    public static String get(String urlString, Map<String, String> headers) throws IOException {
-        urlString = githubProxy(urlString);
+    public static String get(String urlString, Map<String, String> headers, boolean needGithubProxy) throws IOException {
+        if (needGithubProxy) urlString = githubProxy(urlString);
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -35,8 +35,8 @@ public class HttpUtil {
         }
     }
 
-    public static void download(String urlString, File file, Map<String, String> headers) throws IOException {
-        urlString = githubProxy(urlString);
+    public static void download(String urlString, File file, Map<String, String> headers, boolean needGithubProxy) throws IOException {
+        if (needGithubProxy) urlString = githubProxy(urlString);
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");

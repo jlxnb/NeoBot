@@ -1,5 +1,6 @@
 package dev.neovoxel.neobot.script.remote;
 
+import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.neobot.util.HttpUtil;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class Repository {
         headers.put("X-GitHub-Api-Version", "2022-11-28");
     }
 
-    public void fetch() throws IOException, JSONException {
-        String s = HttpUtil.get(url, headers);
+    public void fetch(boolean needGithubProxy) throws IOException, JSONException {
+        String s = HttpUtil.get(url, headers, needGithubProxy);
         JSONObject jsonContent = new JSONObject(s);
         schemaVersion = jsonContent.getInt("schema_version");
         name = jsonContent.getString("name");

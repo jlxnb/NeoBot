@@ -262,7 +262,7 @@ public abstract class CommandProvider {
                             Repository repo = new Repository(url);
                             try {
                                 sender.sendMessage(plugin.getMessageConfig().getMessage("internal.repo.scriptlist.head"));
-                                repo.fetch();
+                                repo.fetch(plugin.getGeneralConfig().getBoolean("repository.use-github-proxy"));
                                 repo.getScripts().forEach(script -> {
                                     for (String message : plugin.getMessageConfig().getStringArray("internal.repo.scriptlist.single")) {
                                         sender.sendMessage(message
@@ -299,7 +299,7 @@ public abstract class CommandProvider {
                                 Repository repository = new Repository(url);
                                 boolean finished = false;
                                 try {
-                                    repository.fetch();
+                                    repository.fetch(plugin.getGeneralConfig().getBoolean("repository.use-github-proxy"));
                                     for (RemoteScript script : repository.getScripts()) {
                                         if (script.getId().equalsIgnoreCase(id)) {
                                             finished = true;
