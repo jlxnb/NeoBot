@@ -20,7 +20,7 @@ public class Repository {
     private String author;
     private String description;
     private String website;
-    private String url;
+    private final String url;
     private List<RemoteScript> scripts = new ArrayList<>();
     private static final Map<String, String> headers = new HashMap<>();
 
@@ -30,12 +30,13 @@ public class Repository {
     }
 
     public void fetch() throws IOException, JSONException {
+        String urlString = url;
         String regex = "https://api.github.com/(.*)/contents/(.*)";
-        Matcher matcher = Pattern.compile(regex).matcher(url);
+        Matcher matcher = Pattern.compile(regex).matcher(urlString);
         if(matcher.find()) {
-            url = "https://raw.githubusercontent.com/" + matcher.group(1) + "/refs/heads/main/" + matcher.group(2);
+            urlString = "https://raw.githubusercontent.com/" + matcher.group(1) + "/refs/heads/main/" + matcher.group(2);
         }
-        String s = HttpUtil.get(url, headers);
+        String s = HttpUtil.get(urlString, headers);
         JSONObject jsonContent = new JSONObject(s);
         // api.github.com
 //        JSONObject jsonObject = new JSONObject(s);
