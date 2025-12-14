@@ -29,15 +29,7 @@ public class Repository {
 
     public void fetch() throws IOException, JSONException {
         String s = HttpUtil.get(url, headers);
-        JSONObject jsonObject = new JSONObject(s);
-        String encoding = jsonObject.getString("encoding");
-        String content = jsonObject.getString("content");
-        JSONObject jsonContent;
-        if (encoding.equalsIgnoreCase("base64")) {
-            jsonContent = new JSONObject(new String(Base64.getMimeDecoder().decode(content)));
-        } else {
-            jsonContent = new JSONObject(content);
-        }
+        JSONObject jsonContent = new JSONObject(s);
         schemaVersion = jsonContent.getInt("schema_version");
         name = jsonContent.getString("name");
         author = jsonContent.getString("author");

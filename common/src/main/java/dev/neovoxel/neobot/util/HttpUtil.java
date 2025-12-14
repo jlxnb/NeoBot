@@ -6,12 +6,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class HttpUtil {
 
     public static String get(String urlString, Map<String, String> headers) throws IOException {
+        urlString = githubProxy(urlString);
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -36,6 +36,7 @@ public class HttpUtil {
     }
 
     public static void download(String urlString, File file, Map<String, String> headers) throws IOException {
+        urlString = githubProxy(urlString);
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -62,5 +63,15 @@ public class HttpUtil {
         } finally {
             connection.disconnect();
         }
+    }
+
+    private static String githubProxy(String url) {
+        List<String> domain = Arrays.asList("https://github.com/", "https://raw.githubusercontent.com/", "https://gist.githubusercontent.com/", "https://api.github.com/");
+        for (String s : domain) {
+            if (url.startsWith(s)) {
+                return ("https://gh-proxy.org/" + url);
+            }
+        }
+        return url;
     }
 }
