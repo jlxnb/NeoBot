@@ -13,6 +13,7 @@ import dev.neovoxel.neobot.bot.BotProvider;
 import dev.neovoxel.neobot.command.CommandProvider;
 import dev.neovoxel.neobot.config.EnhancedConfig;
 import dev.neovoxel.neobot.config.ScriptConfig;
+import dev.neovoxel.neobot.event.VelocityEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.loader.VelocityLibraryLoader;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
@@ -103,6 +104,7 @@ public class NeoBotVelocity implements NeoBot {
 
     @Override
     public void setGameEventListener(GameEventListener listener) {
+        proxyServer.getEventManager().register(this, new VelocityEventManager(this));
         this.gameEventListener = listener;
     }
 
