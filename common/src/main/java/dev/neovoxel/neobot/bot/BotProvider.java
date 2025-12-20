@@ -66,7 +66,7 @@ public class BotProvider {
     }
 
     public void loadOnebot11WsReverse(NeoBot plugin) {
-        String address = plugin.getGeneralConfig().getString("bot.onebot11-ws-reverse.url");
+        String address = plugin.getGeneralConfig().getString("bot.onebot11-ws-reverse.address");
         int port = plugin.getGeneralConfig().getInt("bot.onebot11-ws-reverse.port");
         String token = plugin.getGeneralConfig().getString("bot.onebot11-ws-reverse.access-token");
         OBWSServer client;
