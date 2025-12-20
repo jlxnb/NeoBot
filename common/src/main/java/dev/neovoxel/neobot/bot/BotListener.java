@@ -1,8 +1,7 @@
 package dev.neovoxel.neobot.bot;
 
+import dev.neovoxel.nbapi.action.get.*;
 import dev.neovoxel.nbapi.action.set.SendPrivateMessage;
-import dev.neovoxel.nbapi.action.get.GetGroupMemberInfo;
-import dev.neovoxel.nbapi.action.get.GetGroupMemberList;
 import dev.neovoxel.nbapi.action.set.*;
 import dev.neovoxel.nbapi.event.NEvent;
 import dev.neovoxel.nbapi.event.message.GroupMessageEvent;
@@ -145,6 +144,33 @@ public class BotListener implements NBotListener {
     }
 
     @HostAccess.Export
+    public void setGroupSpecialTitle(long groupId, long userId, String title, long duration) {
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupSpecialTitle(groupId, userId, title, duration));
+            }
+        });
+    }
+
+    @HostAccess.Export
+    public void setGroupWholeBan(long groupId, boolean enable) {
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new SetGroupWholeBan(groupId, enable));
+            }
+        });
+    }
+
+    @HostAccess.Export
+    public void recallMessage(long messageId) {
+        plugin.getBotProvider().getBot().forEach(client -> {
+            if (client.isConnected()) {
+                client.action(new DeleteMessage(messageId));
+            }
+        });
+    }
+
+    @HostAccess.Export
     public void getGroupMemberInfo(long groupId, long userId, Value method) {
         if (method.canExecute()) {
             plugin.getBotProvider().getBot().forEach(client -> {
@@ -163,6 +189,39 @@ public class BotListener implements NBotListener {
             plugin.getBotProvider().getBot().forEach(client -> {
                 if (client.isConnected()) {
                     client.action(new GetGroupMemberList(groupId), method::execute);
+                } else method.execute(new ArrayList<>());
+            });
+        }
+    }
+
+    @HostAccess.Export
+    public void getFriendList(Value method) {
+        if (method.canExecute()) {
+            plugin.getBotProvider().getBot().forEach(client -> {
+                if (client.isConnected()) {
+                    client.action(new GetFriendList(), method::execute);
+                } else method.execute(new ArrayList<>());
+            });
+        }
+    }
+
+    @HostAccess.Export
+    public void getGroupList(Value method) {
+        if (method.canExecute()) {
+            plugin.getBotProvider().getBot().forEach(client -> {
+                if (client.isConnected()) {
+                    client.action(new GetGroupList(), method::execute);
+                } else method.execute(new ArrayList<>());
+            });
+        }
+    }
+
+    @HostAccess.Export
+    public void getGroupInfo(long groupId, Value method) {
+        if (method.canExecute()) {
+            plugin.getBotProvider().getBot().forEach(client -> {
+                if (client.isConnected()) {
+                    client.action(new GetGroupInfo(groupId), method::execute);
                 } else method.execute(new ArrayList<>());
             });
         }

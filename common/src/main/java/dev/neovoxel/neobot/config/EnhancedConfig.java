@@ -1,5 +1,6 @@
 package dev.neovoxel.neobot.config;
 
+import dev.neovoxel.nbapi.util.Role;
 import dev.neovoxel.neobot.NeoBot;
 import org.graalvm.polyglot.HostAccess;
 import org.json.JSONObject;

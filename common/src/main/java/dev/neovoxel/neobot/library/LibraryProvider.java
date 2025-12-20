@@ -36,7 +36,7 @@ public interface LibraryProvider {
         Dependency nbApi = Dependency.builder()
                 .groupId("dev.neovoxel.nbapi")
                 .artifactId("NeoBotAPI")
-                .version("1.2.1")
+                .version("1.2.2")
                 .build();
         Dependency hikariCp;
         if (Float.parseFloat(System.getProperty("java.specification.version")) < 11) {
