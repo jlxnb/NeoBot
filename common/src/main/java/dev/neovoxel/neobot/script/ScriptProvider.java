@@ -3,6 +3,7 @@ package dev.neovoxel.neobot.script;
 import dev.neovoxel.jarflow.JarFlow;
 import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.neobot.util.ValueWithScript;
+import dev.neovoxel.neobot.util.http.HttpBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.graalvm.polyglot.Context;
@@ -75,7 +76,7 @@ public class ScriptProvider {
         for (Class<?> clazz : exposed) {
             for (Method method : clazz.getMethods()) {
                 if (method.getName().equals("wait") || method.getName().equals("notify") || method.getName().equals("notifyAll")) {
-                    continue; // 跳过敏感方法
+                    continue;
                 }
                 builder1.allowAccess(method);
             }
@@ -243,6 +244,7 @@ public class ScriptProvider {
         context.getBindings("js").putMember("gameCommand", plugin.getCommandProvider());
         context.getBindings("js").putMember("messageConfig", plugin.getMessageConfig());
         context.getBindings("js").putMember("generalConfig", plugin.getScriptConfig());
+        context.getBindings("js").putMember("http", new HttpBuilder.Factory());
         context.getBindings("js").putMember("scriptManager", this);
         context.getBindings("js").putMember("__uuid__", uuid);
         contexts.put(script, context);
