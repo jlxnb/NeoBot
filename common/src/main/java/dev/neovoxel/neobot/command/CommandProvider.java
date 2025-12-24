@@ -19,17 +19,12 @@ import java.util.Map;
 import java.util.Objects;
 
 public abstract class CommandProvider {
-    private final List<String> helpMessages = new ArrayList<>();
     private final List<Value> methods = new ArrayList<>();
 
     protected final NeoBot plugin;
 
     protected CommandProvider(NeoBot plugin) {
         this.plugin = plugin;
-        JSONArray jsonArray = plugin.getMessageConfig().getJSONArray("internal.help");
-        for (int i = 0; i < jsonArray.length(); i++) {
-            helpMessages.add(jsonArray.getString(i));
-        }
     }
 
     public abstract void registerCommand();
@@ -37,7 +32,7 @@ public abstract class CommandProvider {
     public void onCommand(CommandSender sender, String[] args) {
         if (args.length == 0) {
             if (sender.hasPermission("neobot.command.help")) {
-                for (String message : helpMessages) {
+                for (String message : plugin.getMessageConfig().getStringArray("internal.help")) {
                     sender.sendMessage(message);
                 }
             } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
@@ -45,7 +40,7 @@ public abstract class CommandProvider {
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("help")) {
                 if (sender.hasPermission("neobot.command.help")) {
-                    for (String message : helpMessages) {
+                    for (String message : plugin.getMessageConfig().getStringArray("internal.help")) {
                         sender.sendMessage(message);
                     }
                 } else sender.sendMessage(plugin.getMessageConfig().getMessage("internal.no-permission"));
@@ -333,11 +328,6 @@ public abstract class CommandProvider {
             }
         }
         methods.forEach(method -> method.execute(sender, args));
-    }
-
-    @HostAccess.Export
-    public void addHelpMessage(String message) {
-        helpMessages.add(message);
     }
 
     @HostAccess.Export

@@ -24,7 +24,7 @@ subprojects {
             exclude("org.json")
         }
         compileOnly("org.java-websocket:Java-WebSocket:1.6.0")
-        compileOnly("dev.neovoxel.nbapi:NeoBotAPI:1.2.2") {
+        compileOnly("dev.neovoxel.nbapi:NeoBotAPI:1.2.3") {
             exclude("org.java-websocket")
         }
         // implementation("io.github.classgraph:classgraph:4.8.184")

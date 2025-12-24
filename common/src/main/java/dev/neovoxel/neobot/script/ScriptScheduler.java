@@ -4,6 +4,7 @@ import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.scheduler.SchedulerProvider;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
 import java.util.ArrayList;
@@ -20,47 +21,53 @@ public class ScriptScheduler {
     public ScriptScheduler(NeoBot plugin) {
         this.plugin = plugin;
     }
-    
+
+    @HostAccess.Export
     public ScheduledTask submit(Value task) {
         if (!task.canExecute()) return null;
         ScheduledTask scheduledTask = plugin.submit(task::execute);
         scriptTasks.put(scheduledTask, task.getContext());
         return scheduledTask;
     }
-    
+
+    @HostAccess.Export
     public ScheduledTask submit(Value task, long delay) {
         if (!task.canExecute()) return null;
         ScheduledTask scheduledTask = plugin.submit(task::execute, delay);
         scriptTasks.put(scheduledTask, task.getContext());
         return scheduledTask;
     }
-    
+
+    @HostAccess.Export
     public ScheduledTask submit(Value task, long delay, long period) {
         if (!task.canExecute()) return null;
         ScheduledTask scheduledTask = plugin.submit(task::execute, delay, period);
         scriptTasks.put(scheduledTask, task.getContext());
         return scheduledTask;
     }
-    
+
+    @HostAccess.Export
     public ScheduledTask submitAsync(Value task) {
         ScheduledTask scheduledTask = plugin.submitAsync(task::execute);
         scriptTasks.put(scheduledTask, task.getContext());
         return scheduledTask;
     }
 
-    
+    @HostAccess.Export
     public ScheduledTask submitAsync(Value task, long delay) {
         ScheduledTask scheduledTask = plugin.submitAsync(task::execute, delay);
         scriptTasks.put(scheduledTask, task.getContext());
         return scheduledTask;
     }
-    
+
+    @HostAccess.Export
     public ScheduledTask submitAsync(Value task, long delay, long period) {
         ScheduledTask scheduledTask = plugin.submitAsync(task::execute, delay, period);
         scriptTasks.put(scheduledTask, task.getContext());
         return scheduledTask;
     }
 
+    @HostAccess.Export
     public ScheduledTask submit(String scriptName, String functionName, long delay) {
         ScheduledTask scheduledTask = plugin.submit(() -> {
             if (plugin.getScriptProvider().isScriptLoaded(scriptName)) {
@@ -74,6 +81,7 @@ public class ScriptScheduler {
         return scheduledTask;
     }
 
+    @HostAccess.Export
     public ScheduledTask submitAsync(String scriptName, String functionName, long delay) {
         ScheduledTask scheduledTask = plugin.submitAsync(() -> {
             if (plugin.getScriptProvider().isScriptLoaded(scriptName)) {
@@ -87,6 +95,7 @@ public class ScriptScheduler {
         return scheduledTask;
     }
 
+    @HostAccess.Export
     public ScheduledTask submit(String scriptName, String functionName, long delay, long period) {
         ScheduledTask scheduledTask = plugin.submit(() -> {
             if (plugin.getScriptProvider().isScriptLoaded(scriptName)) {
@@ -100,6 +109,7 @@ public class ScriptScheduler {
         return scheduledTask;
     }
 
+    @HostAccess.Export
     public ScheduledTask submitAsync(String scriptName, String functionName, long delay, long period) {
         ScheduledTask scheduledTask = plugin.submitAsync(() -> {
             if (plugin.getScriptProvider().isScriptLoaded(scriptName)) {
