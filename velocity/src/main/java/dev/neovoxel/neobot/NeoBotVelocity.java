@@ -16,13 +16,14 @@ import dev.neovoxel.neobot.config.ScriptConfig;
 import dev.neovoxel.neobot.event.VelocityEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
 import dev.neovoxel.neobot.loader.VelocityLibraryLoader;
+import dev.neovoxel.neobot.misc.EventListener;
+import dev.neovoxel.neobot.extension.VelocityExtensionsManager;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.script.ScriptProvider;
 import dev.neovoxel.neobot.script.ScriptScheduler;
 import dev.neovoxel.neobot.storage.StorageProvider;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.graalvm.polyglot.HostAccess;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 
 @Plugin(id = "neobot", name = "NeoBot", version = "0.1", authors = {"NeoVoxelDev Team"}, description = "A bot plugin that connects Minecraft with QQ, Kook, Discord, etc.")
 public class NeoBotVelocity implements NeoBot {
@@ -45,6 +47,9 @@ public class NeoBotVelocity implements NeoBot {
     @Getter
     @Setter
     private BotProvider botProvider;
+
+    @Getter
+    private VelocityExtensionsManager pluginsManager;
 
     @Getter
     @Setter
@@ -100,6 +105,30 @@ public class NeoBotVelocity implements NeoBot {
     @Override
     public File getDataFolder() {
         return dataDirectory.toFile();
+    }
+
+    @Override
+    public void initPluginsManager() {
+        pluginsManager = new VelocityExtensionsManager();
+    }
+
+    @Override
+    public List<EventListener> getListeners(){
+        return pluginsManager.getListenerList();
+    }
+
+    @Override
+    public void loadPlugins(NeoBot plugin) {
+        pluginsManager.loadExtensions(plugin);
+    }
+
+    @Override
+    public void unloadPlugins() {
+        pluginsManager.unloadExtensions();
+    }
+
+    void initPluginsProvider(){
+        pluginsManager = new VelocityExtensionsManager();
     }
 
     @Override

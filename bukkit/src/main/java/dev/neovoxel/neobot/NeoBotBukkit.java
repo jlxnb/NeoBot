@@ -11,6 +11,8 @@ import dev.neovoxel.neobot.config.EnhancedConfig;
 import dev.neovoxel.neobot.config.ScriptConfig;
 import dev.neovoxel.neobot.event.BukkitEventManager;
 import dev.neovoxel.neobot.game.GameEventListener;
+import dev.neovoxel.neobot.misc.EventListener;
+import dev.neovoxel.neobot.extension.BukkitExtensionsManager;
 import dev.neovoxel.neobot.scheduler.ScheduledTask;
 import dev.neovoxel.neobot.script.ScriptProvider;
 import dev.neovoxel.neobot.script.ScriptScheduler;
@@ -34,6 +36,10 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
 
     @Setter
     private ScriptProvider scriptProvider;
+
+    @Getter
+    @Setter
+    private BukkitExtensionsManager pluginsManager;
 
     @Getter(onMethod_ = {@HostAccess.Export})
     @Setter
@@ -69,10 +75,31 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     }
 
     @Override
+    public void initPluginsManager() {
+        pluginsManager = new BukkitExtensionsManager();
+    }
+
+    @Override
     public void setGameEventListener(GameEventListener listener) {
         Bukkit.getPluginManager().registerEvents(new BukkitEventManager(this), this);
         this.gameEventListener = listener;
     }
+
+    @Override
+    public List<EventListener> getListeners(){
+        return pluginsManager.getListenerList();
+    }
+
+    @Override
+    public void loadPlugins(NeoBot plugin) {
+        pluginsManager.loadExtensions(plugin);
+    }
+
+    @Override
+    public void unloadPlugins() {
+        pluginsManager.unloadExtensions();
+    }
+
 
     @Override
     public ScheduledTask submit(Runnable task) {

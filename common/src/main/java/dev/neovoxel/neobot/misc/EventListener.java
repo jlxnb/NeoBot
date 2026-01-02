@@ -1,6 +1,5 @@
 package dev.neovoxel.neobot.misc;
 
-import dev.neovoxel.nbapi.event.NEvent;
 import dev.neovoxel.neobot.NeoBot;
 import lombok.Getter;
 import org.graalvm.polyglot.HostAccess;
