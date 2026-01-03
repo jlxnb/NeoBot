@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import dev.neovoxel.neobot.NeoBotVelocity;
 import dev.neovoxel.neobot.adapter.VelocityPlayer;
+import dev.neovoxel.neobot.game.event.PlayerEvent;
 
 public class VelocityEventManager {
     private final NeoBotVelocity plugin;
@@ -22,12 +23,12 @@ public class VelocityEventManager {
 
     @Subscribe
     public void onJoin(ServerConnectedEvent event) {
-        plugin.getGameEventListener().onJoin(new VelocityPlayer(event.getPlayer()));
+        plugin.getGameEventListener().onJoin(new PlayerEvent(new VelocityPlayer(event.getPlayer())));
     }
 
     @Subscribe
     public void onQuit(DisconnectEvent event) {
-        plugin.getGameEventListener().onQuit(new VelocityPlayer(event.getPlayer()));
+        plugin.getGameEventListener().onQuit(new PlayerEvent(new VelocityPlayer(event.getPlayer())));
     }
 
     @Subscribe

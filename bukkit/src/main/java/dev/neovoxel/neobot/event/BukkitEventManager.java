@@ -2,6 +2,8 @@ package dev.neovoxel.neobot.event;
 
 import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.neobot.adapter.BukkitPlayer;
+import dev.neovoxel.neobot.game.event.DeathEvent;
+import dev.neovoxel.neobot.game.event.PlayerEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -26,7 +28,7 @@ public class BukkitEventManager implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        plugin.getGameEventListener().onQuit(new BukkitPlayer(event.getPlayer()));
+        plugin.getGameEventListener().onQuit(new PlayerEvent(new BukkitPlayer(event.getPlayer())));
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -36,11 +38,11 @@ public class BukkitEventManager implements Listener {
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
-        plugin.getGameEventListener().onDeath(new BukkitPlayer(event.getEntity()), event.getDeathMessage());
+        plugin.getGameEventListener().onDeath(new DeathEvent(new BukkitPlayer(event.getEntity()), event.getDeathMessage()));
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
-        plugin.getGameEventListener().onJoin(new BukkitPlayer(event.getPlayer()));
+        plugin.getGameEventListener().onJoin(new PlayerEvent(new BukkitPlayer(event.getPlayer())));
     }
 }

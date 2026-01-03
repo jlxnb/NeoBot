@@ -13,7 +13,6 @@ import dev.neovoxel.nbapi.event.request.GroupRequestType;
 import dev.neovoxel.nbapi.listener.NBotEventHandler;
 import dev.neovoxel.nbapi.listener.NBotListener;
 import dev.neovoxel.neobot.NeoBot;
-import dev.neovoxel.neobot.bot.types.NGroupMessageEvent;
 import dev.neovoxel.neobot.misc.EventListener;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
@@ -95,7 +94,7 @@ public class BotListener extends EventListener implements NBotListener {
 
     @HostAccess.Export
     public void approveGroupRequest(String flag, String type) {
-        getPlugin().getBotProvider().getBot().forEach(client -> {
+        plugin.getBotProvider().getBot().forEach(client -> {
             if (client.isConnected()) {
                 client.action(new SetGroupAddRequest(flag, GroupRequestType.from(type)));
             }
@@ -215,7 +214,7 @@ public class BotListener extends EventListener implements NBotListener {
     
     @NBotEventHandler
     private void onGroupMessage(GroupMessageEvent event) {
-        fireEvent("GroupMessageEvent", new NGroupMessageEvent(event));
+        fireEvent("GroupMessageEvent", event);
     }
 
     @NBotEventHandler

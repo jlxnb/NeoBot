@@ -17,13 +17,13 @@ public interface ConfigProvider {
         loadScriptConfig(plugin);
     }
 
+    // without script config, script config will be reloaded when loading scripts
     default void reloadConfig(NeoBot plugin) {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
         }
         getGeneralConfig().flush(plugin);
         getMessageConfig().flush(plugin);
-        getScriptConfig().flush(plugin);
     }
 
     void setMessageConfig(EnhancedConfig config);

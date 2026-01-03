@@ -5,7 +5,7 @@ import org.graalvm.polyglot.HostAccess;
 
 import java.util.UUID;
 
-@Getter
+@Getter(onMethod_ = {@HostAccess.Export})
 public abstract class LoginEvent {
     private final String name;
     private final UUID uuid;
@@ -13,16 +13,6 @@ public abstract class LoginEvent {
     protected LoginEvent(String name, UUID uuid) {
         this.name = name;
         this.uuid = uuid;
-    }
-
-    @HostAccess.Export
-    public String getName() {
-        return name;
-    }
-
-    @HostAccess.Export
-    public UUID getUuid() {
-        return uuid;
     }
 
     public abstract void disallow(String reason);

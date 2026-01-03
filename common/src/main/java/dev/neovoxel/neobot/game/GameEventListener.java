@@ -2,7 +2,9 @@ package dev.neovoxel.neobot.game;
 
 import dev.neovoxel.neobot.NeoBot;
 import dev.neovoxel.neobot.game.event.ChatEvent;
+import dev.neovoxel.neobot.game.event.DeathEvent;
 import dev.neovoxel.neobot.game.event.LoginEvent;
+import dev.neovoxel.neobot.game.event.PlayerEvent;
 import dev.neovoxel.neobot.adapter.Player;
 import dev.neovoxel.neobot.misc.EventListener;
 
@@ -15,17 +17,16 @@ public class GameEventListener extends EventListener {
         fireEvent("LoginEvent", event);
     }
 
-    public void onJoin(Player player) {
-        fireEvent("JoinEvent", player);
+    public void onJoin(PlayerEvent event) {
+        fireEvent("JoinEvent", event);
     }
 
-
-    public void onQuit(Player player) {
-        fireEvent("QuitEvent", player);
+    public void onQuit(PlayerEvent event) {
+        fireEvent("QuitEvent", event);
     }
 
-    public void onDeath(Player player, String message) {
-        fireEvent("DeathEvent", player, message);
+    public void onDeath(DeathEvent event) {
+        fireEvent("DeathEvent", event);
     }
 
     public void onChat(ChatEvent event) {

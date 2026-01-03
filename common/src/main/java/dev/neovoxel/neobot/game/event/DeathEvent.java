@@ -5,14 +5,11 @@ import lombok.Getter;
 import org.graalvm.polyglot.HostAccess;
 
 @Getter(onMethod_ = {@HostAccess.Export})
-public abstract class ChatEvent extends PlayerEvent {
+public class DeathEvent extends PlayerEvent {
     private final String message;
 
-    protected ChatEvent(Player player, String message) {
+    public DeathEvent(Player player, String deathMessage) {
         super(player);
-        this.message = message;
+        this.message = deathMessage;
     }
-
-    @HostAccess.Export
-    public abstract void disallow();
 }

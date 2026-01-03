@@ -48,7 +48,7 @@ public class BotProvider {
             for (NBotClient client : getBot()) {
                 if (!client.isConnected()) client.reconnect();
             }
-        }, 0, plugin.getGeneralConfig().getInt("bot.options.check-interval"));
+        }, 5, plugin.getGeneralConfig().getInt("bot.options.check-interval"));
     }
 
     public void loadOnebot11Ws(NeoBot plugin) throws URISyntaxException {
