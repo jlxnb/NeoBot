@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
+import java.util.Map;
 
 @Plugin(id = "neobot", name = "NeoBot", version = "0.1", authors = {"NeoVoxelDev Team"}, description = "A bot plugin that connects Minecraft with QQ, Kook, Discord, etc.")
 public class NeoBotVelocity implements NeoBot {
@@ -113,17 +113,17 @@ public class NeoBotVelocity implements NeoBot {
     }
 
     @Override
-    public List<EventListener> getListeners(){
-        return pluginsManager.getListenerList();
+    public Map<String, EventListener> getListenerMap(){
+        return pluginsManager.getListenerMap();
     }
 
     @Override
-    public void loadPlugins(NeoBot plugin) {
+    public void loadExtensions(NeoBot plugin) {
         pluginsManager.loadExtensions(plugin);
     }
 
     @Override
-    public void unloadPlugins() {
+    public void unloadExtensions() {
         pluginsManager.unloadExtensions();
     }
 

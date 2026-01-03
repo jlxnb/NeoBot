@@ -33,7 +33,7 @@ subprojects {
         compileOnly("org.graalvm.js:js:22.0.0.2")
 
         // plugins
-        compileOnly("org.pf4j:pf4j:3.6.0")
+        implementation("org.pf4j:pf4j:3.6.0")
 
         // storage
         compileOnly("dev.neovoxel.nsapi:NeoStorageAPI:1.1.0")

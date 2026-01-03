@@ -7,17 +7,29 @@ import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExtensionsManager {
     PluginManager pluginManager;
     @Getter
-    List<EventListener> listenerList = new ArrayList<>();
+    Map<String, EventListener> listenerMap = new HashMap<>();
     public void loadExtensions(NeoBot plugin){
         // 初始化插件管理器
-        PluginManager pluginManager = new DefaultPluginManager(Paths.get(plugin.getDataFolder().getAbsolutePath(),"plugins"));
+        Path path = Paths.get(plugin.getDataFolder().getAbsolutePath(),"extensions");
+        try {
+            if (!Files.exists(path)) {
+                Files.createDirectory(path);
+            }
+        }catch(IOException e){
+            plugin.getNeoLogger().error("创建目录失败: " + e.getMessage());
+        }
+        PluginManager pluginManager = new DefaultPluginManager(path);
         pluginManager.loadPlugins();
 
         // 启动插件
@@ -26,13 +38,13 @@ public class ExtensionsManager {
         // 获取所有实现了 ListenerProvider 的扩展
         List<ListenerProvider> extensions = pluginManager.getExtensions(ListenerProvider.class);
         for (ListenerProvider ext : extensions) {
-            listenerList.add(ext.getListener());
+            listenerMap.put(ext.getExtensionName(),ext.getListener(plugin));
         }
     }
 
     public void unloadExtensions(){
-        for(EventListener listener : listenerList){
-            listener.reset();
+        for(Map.Entry<String, EventListener> entry : listenerMap.entrySet()){
+            entry.getValue().reset();
         }
         pluginManager.stopPlugins();
     }

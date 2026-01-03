@@ -26,6 +26,7 @@ import org.graalvm.polyglot.HostAccess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class NeoBotBukkit extends JavaPlugin implements NeoBot {
@@ -86,17 +87,17 @@ public class NeoBotBukkit extends JavaPlugin implements NeoBot {
     }
 
     @Override
-    public List<EventListener> getListeners(){
-        return pluginsManager.getListenerList();
+    public Map<String, EventListener> getListenerMap(){
+        return pluginsManager.getListenerMap();
     }
 
     @Override
-    public void loadPlugins(NeoBot plugin) {
+    public void loadExtensions(NeoBot plugin) {
         pluginsManager.loadExtensions(plugin);
     }
 
     @Override
-    public void unloadPlugins() {
+    public void unloadExtensions() {
         pluginsManager.unloadExtensions();
     }
 
