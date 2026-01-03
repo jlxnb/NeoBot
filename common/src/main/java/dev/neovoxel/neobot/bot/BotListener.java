@@ -94,7 +94,7 @@ public class BotListener extends EventListener implements NBotListener {
 
     @HostAccess.Export
     public void approveGroupRequest(String flag, String type) {
-        plugin.getBotProvider().getBot().forEach(client -> {
+        getPlugin().getBotProvider().getBot().forEach(client -> {
             if (client.isConnected()) {
                 client.action(new SetGroupAddRequest(flag, GroupRequestType.from(type)));
             }
