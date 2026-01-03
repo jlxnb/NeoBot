@@ -29,7 +29,7 @@ public class ExtensionsManager {
         }catch(IOException e){
             plugin.getNeoLogger().error("创建目录失败: " + e.getMessage());
         }
-        PluginManager pluginManager = new DefaultPluginManager(path);
+        pluginManager = new DefaultPluginManager(path);
         pluginManager.loadPlugins();
 
         // 启动插件

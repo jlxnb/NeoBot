@@ -93,6 +93,7 @@ public interface NeoBot extends ExtensionsProvider, ConfigProvider, GameProvider
                 getScriptProvider().unloadScript();
 
                 getNeoLogger().info("Reloading extensions...");
+                unloadExtensions();
                 initPluginsManager();
                 loadExtensions(this);
 
